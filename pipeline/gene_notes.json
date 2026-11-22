@@ -1,0 +1,121 @@
+{
+ "_comment": "Per-gene blurbs (<=25 words, neutral) written from the cited abstracts (PubMed efetch, 2026-11-22); Floor & Doudna gene-specific statements are from the full text (Europe PMC PMC4764583). Genes not listed keep blurb ''.",
+ "sources": {
+  "vattem2004": {
+   "citation": "Vattem KM, Wek RC. Reinitiation involving upstream ORFs regulates ATF4 mRNA translation in mammalian cells. PNAS 101:11269-74 (2004). PMID 15277680",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC509193/"
+  },
+  "landers1997": {
+   "citation": "Landers JE, Cassel SL, George DL. Translational enhancement of mdm2 oncogene expression in human tumor cells containing a stabilized wild-type p53 protein. Cancer Res 57:3562-8 (1997). PMID 9270029",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/9270029/"
+  },
+  "brown1999": {
+   "citation": "Brown CY, Mize GJ, Pineda M, George DL, Morris DR. Role of two upstream open reading frames in the translational control of oncogene mdm2. Oncogene 18:5631-7 (1999). PMID 10523842",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/10523842/"
+  },
+  "sobczak2002": {
+   "citation": "Sobczak K, Krzyzosiak WJ. Structural determinants of BRCA1 translational regulation. J Biol Chem 277:17349-58 (2002). PMID 11877386",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/11877386/"
+  },
+  "watatani2008": {
+   "citation": "Watatani Y et al. Stress-induced translation of ATF5 mRNA is regulated by the 5'-untranslated region. J Biol Chem 283:2543-53 (2008). PMID 18055463",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/18055463/"
+  },
+  "child1999": {
+   "citation": "Child SJ, Miller MK, Geballe AP. Cell type-dependent and -independent control of HER-2/neu translation. Int J Biochem Cell Biol 31:201-13 (1999). PMID 10216954",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/10216954/"
+  },
+  "kos2002": {
+   "citation": "Kos M, Denger S, Reid G, Gannon F. Upstream open reading frames regulate the translation of the multiple mRNA variants of the estrogen receptor alpha. J Biol Chem 277:37131-8 (2002). PMID 12147702",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/12147702/"
+  },
+  "palam2011": {
+   "citation": "Palam LR, Baird TD, Wek RC. Phosphorylation of eIF2 facilitates ribosomal bypass of an inhibitory upstream ORF to enhance CHOP translation. J Biol Chem 286:10939-49 (2011). PMID 21285359",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/21285359/"
+  },
+  "floor2016": {
+   "citation": "Floor SN, Doudna JA. Tunable protein synthesis by transcript isoforms in human cells. eLife 5:e10921 (2016). PMID 26735365",
+   "url": "https://elifesciences.org/articles/10921"
+  }
+ },
+ "genes": {
+  "ATF4": {
+   "cite": [
+    "vattem2004"
+   ],
+   "blurb": "In mouse ATF4, positive-acting uORF1 promotes reinitiation at inhibitory uORF2; eIF2 phosphorylation delays reinitiation so ribosomes bypass uORF2 and reach the ATF4 coding region."
+  },
+  "MDM2": {
+   "cite": [
+    "landers1997",
+    "brown1999"
+   ],
+   "blurb": "Two promoters give a long leader with two uORFs, loaded with ribosomes inefficiently, and a short leader from the internal p53-responsive promoter, translated efficiently."
+  },
+  "BRCA1": {
+   "cite": [
+    "sobczak2002"
+   ],
+   "blurb": "Alternative leaders: 5'-UTRb (longer) is translated less efficiently than 5'-UTRa, attributed to stable structure from a truncated Alu element and upstream AUGs."
+  },
+  "ATF5": {
+   "cite": [
+    "watatani2008"
+   ],
+   "blurb": "Alternative first exons give 5'-UTRalpha and 5'-UTRbeta; both repress translation, but only 5'-UTRalpha repression is released by amino-acid limitation, via eIF2alpha phosphorylation."
+  },
+  "ERBB2": {
+   "cite": [
+    "child1999"
+   ],
+   "blurb": "The HER-2 transcript leader contains a short conserved uORF that represses downstream translation; mutating its upstream start codon relieved most of the inhibition."
+  },
+  "ESR1": {
+   "cite": [
+    "kos2002"
+   ],
+   "blurb": "Multiple promoters produce ER-alpha mRNAs whose 5'-UTRs carry one to six uORFs; some leaders strongly inhibit translation, with leaky scanning and reinitiation."
+  },
+  "DDIT3": {
+   "cite": [
+    "palam2011"
+   ],
+   "blurb": "A single uORF with poor start-site context blocks CHOP translation; stress-induced eIF2 phosphorylation lets scanning ribosomes bypass it and translate CHOP."
+  },
+  "RICTOR": {
+   "cite": [
+    "floor2016"
+   ],
+   "blurb": "Two RICTOR 5' leaders differing only slightly gave different reporter protein output, possibly via altered RNA secondary structure near the 5' cap (TrIP-seq follow-up)."
+  },
+  "SRSF5": {
+   "cite": [
+    "floor2016"
+   ],
+   "blurb": "Both tested SRSF5 5' leaders carry two uORFs, close to or far from the start codon; reinitiation after uORF translation was suggested to affect output."
+  },
+  "CCNE2": {
+   "cite": [
+    "floor2016"
+   ],
+   "blurb": "Two CCNE2 isoforms differing in both 5' and 3' UTRs were tested; isoform-level translational control was proposed to possibly act via the 5' UTR."
+  }
+ },
+ "findings": [
+  {
+   "id": "mdm2_p2",
+   "title": "MDM2: short P2 leader translated better than long P1 leader",
+   "cite": "brown1999",
+   "gene": "MDM2",
+   "better": "ENST00000539479.7",
+   "worse": "ENST00000393412.8",
+   "evidence": "MDM2-224's first exon (chr12:68809002-68809086) lies in intron 1 of the P1 transcripts (internal P2 promoter; 89-nt leader, no fully upstream uORF), MDM2-209 starts in P1 exon 1 (same exon as MANE; 305-nt leader, 2 uORFs), and both use the same start codon (chr12:68809212)."
+  }
+ ],
+ "findings_skipped": {
+  "BRCA1": "5'UTRa/5'UTRb not mappable with confidence: abstract gives no coordinates/sequence and the JBC full text was not retrievable; candidate long-exon-1 isoforms (BRCA1-226/244/258) not verified to contain the truncated Alu.",
+  "RICTOR": "Paper's two leaders differ by nine nucleotides; Ensembl 116 RICTOR leaders (22 vs 167 nt) do not match that.",
+  "SRSF5": "Paper names SRSF5-002/-005 (old Havana names) but the text does not state which is translated better; not mapped.",
+  "CCNE2": "Isoforms differ in both 5' and 3' UTRs; no 5'-leader-only direction stated."
+ }
+}

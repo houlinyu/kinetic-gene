@@ -1,0 +1,8 @@
+node_modules/
+app/dist/
+.vercel/
+.env*
+pipeline/cache/
+pipeline/external/
+__pycache__/
+*.pyc

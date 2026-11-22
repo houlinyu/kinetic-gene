@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UTR Race</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="panel">
+      <h1>UTR Race</h1>
+      <p class="sub">Two versions of one gene's start region race to make protein.</p>
+      <label class="genepick">Gene <select id="gene"></select></label>
+      <div id="verdict"></div>
+      <button id="stressBtn" type="button">⚡ Apply stress</button>
+      <div id="cards">
+        <div class="lane-card" id="cardA"></div>
+        <div class="lane-card" id="cardB"></div>
+      </div>
+      <div id="fates"></div>
+      <details id="more">
+        <summary>Structure stats, legend &amp; sources</summary>
+        <div id="stats"></div>
+        <div id="legend">
+          <span><i style="background:#fff"></i>ribosome scanning, has eIF2·TC</span>
+          <span><i style="background:#7c8494"></i>scanning, no TC (can't start)</span>
+          <span><i style="background:#ffb547"></i>uORF / ribosome on uORF</span>
+          <span><i style="background:#ff6b4a"></i>overlapping uORF (loses ribosome)</span>
+          <span><i style="background:#e85d9c"></i>protein-coding start / made protein</span>
+          <span><i style="background:#4fc3f7"></i>base pair (ViennaRNA MFE)</span>
+        </div>
+        <div id="sources"></div>
+      </details>
+      <p class="fine" id="prov"></p>
+    </div>
+    <div id="side">
+      <div id="score"></div>
+      <div id="guiHost"></div>
+    </div>
+    <button id="sideToggle" type="button"></button>
+    <div id="stressPill">⚡ STRESS: eIF2·TC low</div>
+    <div id="tip"></div>
+    <div id="hint">click orange uORF = mutate AUG · click blue arcs = melt hairpin · drag = orbit · space = pause · S = stress</div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
