@@ -1,0 +1,252 @@
+{
+ "format": "utr-race/struct-constants-v1",
+ "note": "Physical constants for the transcription + splicing view. Every entry is MEASURED - from the deposited coordinates of the cited PDB entry, or from the cited GENCODE release - by the script named in `measured_by`, and can be regenerated. Nothing here is a remembered textbook value: numbers that would have needed a literature quote we could not actually read are in `omitted` with the reason. Companion to constants.json (the translation-side constants from pipeline/structures/); the two files do not overlap.",
+ "generated": "2026-11-22",
+ "generated_by": "pipeline/structures_txn/build_txn_constants.py",
+ "constants": [
+  {
+   "name": "dna_duplex_rise_per_bp",
+   "value": 3.47,
+   "unit": "A",
+   "label": "DNA axial rise per base pair (measured)",
+   "note": "Measured in a real double-stranded DNA duplex bound to Pol II, not a canonical B-DNA literature value. The duplex is held and slightly bent by the enzyme, so treat this as 'the rise in this structure' (sd 0.23 A).",
+   "evidence": "Measured from the downstream DNA duplex of PDB 6GMH, template residues 1-23 (23 bp): axis = PCA of the C1'-C1' base-pair midpoints of this run; rise = axial span / (n_bp - 1) along that axis (projecting removes the precession of the midpoints about the axis); twist = angle between successive C1'->C1' vectors projected perpendicular to that axis; diameter = P-to-P distance across a base pair (phosphate convention, so it is smaller than the van-der-Waals width)",
+   "source": {
+    "citation": "Vos SM, Farnung L, Boehning M, Wigge C, Linden A, Urlaub H, Cramer P. Structure of activated transcription complex Pol II-DSIF-PAF-SPT6. Nature 560:607-612 (2018). doi:10.1038/s41586-018-0440-4, PMID 30135578. Deposited coordinates: PDB 6GMH.",
+    "url": "https://www.rcsb.org/structure/6GMH"
+   },
+   "sd_A": 0.23,
+   "n_bp": 23,
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "dna_duplex_bp_per_turn",
+   "value": 10.0,
+   "unit": "bp/turn",
+   "label": "DNA base pairs per helical turn (measured)",
+   "note": "From the measured mean twist of 36.1 deg/bp (360 / twist). Same caveat as the rise: this is this duplex, in this complex.",
+   "evidence": "Measured from the downstream DNA duplex of PDB 6GMH, template residues 1-23 (23 bp): axis = PCA of the C1'-C1' base-pair midpoints of this run; rise = axial span / (n_bp - 1) along that axis (projecting removes the precession of the midpoints about the axis); twist = angle between successive C1'->C1' vectors projected perpendicular to that axis; diameter = P-to-P distance across a base pair (phosphate convention, so it is smaller than the van-der-Waals width)",
+   "source": {
+    "citation": "Vos SM, Farnung L, Boehning M, Wigge C, Linden A, Urlaub H, Cramer P. Structure of activated transcription complex Pol II-DSIF-PAF-SPT6. Nature 560:607-612 (2018). doi:10.1038/s41586-018-0440-4, PMID 30135578. Deposited coordinates: PDB 6GMH.",
+    "url": "https://www.rcsb.org/structure/6GMH"
+   },
+   "twist_per_bp_deg": 36.1,
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "dna_duplex_diameter_phosphate_convention",
+   "value": 19.0,
+   "unit": "A",
+   "label": "DNA duplex diameter, phosphate-to-phosphate convention (measured)",
+   "note": "CONVENTION-DEPENDENT. This is the P-to-P distance across a base pair, which is the backbone-to-backbone width. The commonly quoted ~20 A for B-DNA is a van-der-Waals-inclusive convention and is therefore larger; we could not read a citable source for that number, so it is not given here. Use this one for a tube radius and add the vdW shell if you want a solid-looking helix.",
+   "evidence": "Measured from the downstream DNA duplex of PDB 6GMH, template residues 1-23 (23 bp): mean P(template)-P(non-template) distance across each base pair (sd 0.5 A)",
+   "source": {
+    "citation": "Vos SM, Farnung L, Boehning M, Wigge C, Linden A, Urlaub H, Cramer P. Structure of activated transcription complex Pol II-DSIF-PAF-SPT6. Nature 560:607-612 (2018). doi:10.1038/s41586-018-0440-4, PMID 30135578. Deposited coordinates: PDB 6GMH.",
+    "url": "https://www.rcsb.org/structure/6GMH"
+   },
+   "sd_A": 0.5,
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "polii_max_dimension",
+   "value": 16.66,
+   "unit": "nm",
+   "label": "RNA polymerase II maximum dimension",
+   "note": "The 12-subunit Pol II core alone (RPB1-RPB12), elongation factors excluded. Backbone trace atoms only, so the all-atom extent is ~0.5 nm larger. Axis-aligned bounding box in the asset's own frame: [12.93, 14.62, 15.78] nm.",
+   "evidence": "Largest distance between any two Pol II CA atoms modelled in PDB 6GMH",
+   "source": {
+    "citation": "Vos SM, Farnung L, Boehning M, Wigge C, Linden A, Urlaub H, Cramer P. Structure of activated transcription complex Pol II-DSIF-PAF-SPT6. Nature 560:607-612 (2018). doi:10.1038/s41586-018-0440-4, PMID 30135578. Deposited coordinates: PDB 6GMH.",
+    "url": "https://www.rcsb.org/structure/6GMH"
+   },
+   "bbox_nm": [
+    12.93,
+    14.62,
+    15.78
+   ],
+   "radius_of_gyration_nm": 5.09,
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "polii_elongation_complex_max_dimension",
+   "value": 24.64,
+   "unit": "nm",
+   "label": "Activated Pol II elongation complex maximum dimension",
+   "note": "Pol II + DSIF + PAF1 complex + SPT6 + the 48-bp nucleic-acid scaffold, i.e. the whole particle in this entry. Use this, not the Pol II number, when the view shows the elongation factors.",
+   "evidence": "Largest distance between any two backbone trace atoms modelled in PDB 6GMH",
+   "source": {
+    "citation": "Vos SM, Farnung L, Boehning M, Wigge C, Linden A, Urlaub H, Cramer P. Structure of activated transcription complex Pol II-DSIF-PAF-SPT6. Nature 560:607-612 (2018). doi:10.1038/s41586-018-0440-4, PMID 30135578. Deposited coordinates: PDB 6GMH.",
+    "url": "https://www.rcsb.org/structure/6GMH"
+   },
+   "bbox_nm": [
+    16.65,
+    21.3,
+    19.78
+   ],
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "transcription_bubble_size",
+   "value": 11,
+   "unit": "nt",
+   "label": "Transcription bubble: unpaired DNA nucleotides",
+   "note": "MEASURED FROM THE MODEL, not quoted from a paper. Template residues 24-34 have no non-template partner. 11 nt of the non-template strand (residues 15-25) are disordered and absent from the deposited model, so the true single-stranded extent could differ by a nucleotide or two. Do not present this as a published bubble size.",
+   "evidence": "template nucleotides with no non-template partner within 12.0 A, plus the template positions whose non-template partners are not modelled at all; measured from the deposited coordinates of PDB 6GMH",
+   "source": {
+    "citation": "Vos SM, Farnung L, Boehning M, Wigge C, Linden A, Urlaub H, Cramer P. Structure of activated transcription complex Pol II-DSIF-PAF-SPT6. Nature 560:607-612 (2018). doi:10.1038/s41586-018-0440-4, PMID 30135578. Deposited coordinates: PDB 6GMH.",
+    "url": "https://www.rcsb.org/structure/6GMH"
+   },
+   "template_residues": [
+    24,
+    34
+   ],
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "dna_rna_hybrid_length",
+   "value": 10,
+   "unit": "bp",
+   "label": "DNA:RNA hybrid in the Pol II active site",
+   "note": "Template nucleotides paired with the nascent transcript. A distance criterion (C1'-C1' <= 12 A), not a base-pair annotation, so it can be off by one.",
+   "evidence": "nucleotides whose C1' lies within 12.0 A of a C1' of the other strand; a distance criterion, not a base-pair annotation, so the two counts can differ by one",
+   "source": {
+    "citation": "Vos SM, Farnung L, Boehning M, Wigge C, Linden A, Urlaub H, Cramer P. Structure of activated transcription complex Pol II-DSIF-PAF-SPT6. Nature 560:607-612 (2018). doi:10.1038/s41586-018-0440-4, PMID 30135578. Deposited coordinates: PDB 6GMH.",
+    "url": "https://www.rcsb.org/structure/6GMH"
+   },
+   "template_residues": [
+    25,
+    34
+   ],
+   "rna_residues": [
+    37,
+    46
+   ],
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "nascent_rna_resolved_in_exit_channel",
+   "value": 11,
+   "unit": "nt",
+   "label": "Nascent RNA resolved beyond the hybrid, in the exit channel",
+   "note": "This is what is MODELLED threading the exit channel in this structure. It is NOT the nuclease-protected length of nascent RNA, and it is a lower bound: only 21 of the 46 nt of the RNA entity are modelled at all.",
+   "evidence": "from the 5'-most nucleotide of the DNA:RNA hybrid to the 5'-most modelled nucleotide of the transcript; the nt count is what is RESOLVED threading the exit channel in this model, not the full nuclease-protected length",
+   "source": {
+    "citation": "Vos SM, Farnung L, Boehning M, Wigge C, Linden A, Urlaub H, Cramer P. Structure of activated transcription complex Pol II-DSIF-PAF-SPT6. Nature 560:607-612 (2018). doi:10.1038/s41586-018-0440-4, PMID 30135578. Deposited coordinates: PDB 6GMH.",
+    "url": "https://www.rcsb.org/structure/6GMH"
+   },
+   "chord_length_nm": 6.27,
+   "exit_direction_in_asset_frame": [
+    0.7052,
+    0.0,
+    0.709
+   ],
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "spliceosome_max_dimension",
+   "value": 36.3,
+   "unit": "nm",
+   "label": "Spliceosome (human C* complex) maximum dimension",
+   "note": "All modelled chains of the C* complex, including the exon junction complex and AQR. Axis-aligned bounding box in the asset's own frame: [31.04, 24.43, 31.79] nm. Backbone trace atoms only, so the all-atom extent is ~0.5 nm larger.",
+   "evidence": "Largest distance between any two backbone trace atoms modelled in PDB 5XJC",
+   "source": {
+    "citation": "Zhang X, Yan C, Hang J, Finci LI, Lei J, Shi Y. An Atomic Structure of the Human Spliceosome. Cell 169:918-929 (2017). doi:10.1016/j.cell.2017.04.033, PMID 28502770. Deposited coordinates: PDB 5XJC.",
+    "url": "https://www.rcsb.org/structure/5XJC"
+   },
+   "bbox_nm": [
+    31.04,
+    24.43,
+    31.79
+   ],
+   "radius_of_gyration_nm": 10.64,
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "u1_snrnp_max_dimension",
+   "value": 12.6,
+   "unit": "nm",
+   "label": "Minimal U1 snRNP + 5' splice site, maximum dimension",
+   "note": "ENGINEERED CONSTRUCT: the U1 snRNA four-helix junction is replaced by a kissing loop and stem-loop 4 is shortened, and U1-A is absent, so this is smaller than a native U1 snRNP. Do not quote it as the size of U1 snRNP.",
+   "evidence": "Largest distance between any two backbone trace atoms of the exported copy of PDB 4PJO",
+   "source": {
+    "citation": "Kondo Y, Oubridge C, van Roon AM, Nagai K. Crystal structure of human U1 snRNP, a small nuclear ribonucleoprotein particle, reveals the mechanism of 5' splice site recognition. eLife 4:e04986 (2015). doi:10.7554/eLife.04986, PMID 25555158. Deposited coordinates: PDB 4PJO.",
+    "url": "https://www.rcsb.org/structure/4PJO"
+   },
+   "bbox_nm": [
+    11.79,
+    11.01,
+    7.5
+   ],
+   "measured_by": "pipeline/structures_txn/build_txn_structures.py"
+  },
+  {
+   "name": "human_intron_length_median",
+   "value": 1556,
+   "unit": "bp",
+   "label": "Median human intron length",
+   "note": "Measured genome-wide from the GENCODE annotation, one Ensembl_canonical transcript per protein-coding gene (19733 transcripts, 186471 introns). The distribution is extremely skewed: mean 5916.6 bp, IQR 515-4156 bp, max 1240120 bp. Use the median for a 'typical' intron and show the IQR if the UI implies a range.",
+   "evidence": "GENCODE exon records of protein_coding transcripts of protein_coding genes, one Ensembl_canonical transcript per gene; introns = gaps between consecutive exons of the same transcript",
+   "source": {
+    "citation": "GENCODE release 47, basic gene annotation for GRCh38 (gencode.v47.basic.annotation.gtf.gz), measured by pipeline/structures_txn/gene_features.py.",
+    "url": "https://www.gencodegenes.org/human/release_47.html"
+   },
+   "mean_bp": 5916.6,
+   "p25_bp": 515,
+   "p75_bp": 4156,
+   "max_bp": 1240120,
+   "n": 186471,
+   "annotation": "gencode.v47.basic.annotation.gtf.gz",
+   "measured_by": "pipeline/structures_txn/gene_features.py"
+  },
+  {
+   "name": "human_exon_length_median",
+   "value": 133.0,
+   "unit": "bp",
+   "label": "Median human exon length",
+   "note": "Same annotation and transcript set as the intron constant (206204 exons). Mean 349.8 bp, IQR 94-196 bp; the mean is inflated by long terminal exons carrying 3' UTRs, so the median is the number to show.",
+   "evidence": "GENCODE exon records of protein_coding transcripts of protein_coding genes, one Ensembl_canonical transcript per gene; introns = gaps between consecutive exons of the same transcript",
+   "source": {
+    "citation": "GENCODE release 47, basic gene annotation for GRCh38 (gencode.v47.basic.annotation.gtf.gz), measured by pipeline/structures_txn/gene_features.py.",
+    "url": "https://www.gencodegenes.org/human/release_47.html"
+   },
+   "mean_bp": 349.8,
+   "p25_bp": 94,
+   "p75_bp": 196,
+   "max_bp": 33290,
+   "n": 206204,
+   "annotation": "gencode.v47.basic.annotation.gtf.gz",
+   "measured_by": "pipeline/structures_txn/gene_features.py"
+  }
+ ],
+ "omitted": [
+  {
+   "name": "b_form_dna_rise_per_bp_canonical",
+   "wanted": "3.4 A (the textbook value)",
+   "why_omitted": "We could not read a citable source for it. Europe PMC's fullTextXML endpoint returned HTTP 500 for every article we tried, and the publisher pages for the classic references (Wing et al., Nature 1980; Wang, PNAS 1979) returned 403 or a reCAPTCHA interstitial. Use `dna_duplex_rise_per_bp`, which is measured from PDB 6GMH, and label it as measured."
+  },
+  {
+   "name": "b_form_dna_bp_per_turn_canonical",
+   "wanted": "10.5 bp/turn in solution",
+   "why_omitted": "Same reason. `dna_duplex_bp_per_turn` (10.0, measured from 6GMH) is the enzyme-bound duplex, not the solution value; do not relabel it."
+  },
+  {
+   "name": "b_form_dna_diameter_vdw",
+   "wanted": "~20 A van-der-Waals width",
+   "why_omitted": "Convention-dependent and unsourced. `dna_duplex_diameter_phosphate_convention` is given instead."
+  },
+  {
+   "name": "transcription_bubble_size_published",
+   "wanted": "the bubble size in nt as stated in a primary paper",
+   "why_omitted": "Barnes et al. (Mol Cell 2015) and Kettenberger et al. (Mol Cell 2004) were both behind 403s. `transcription_bubble_size` is measured from PDB 6GMH instead and is labelled as such."
+  },
+  {
+   "name": "nascent_rna_nuclease_protected_length",
+   "wanted": "the length of nascent RNA protected by Pol II",
+   "why_omitted": "No source we could read. The asset reports only what is modelled in the exit channel (`nascent_rna_resolved_in_exit_channel`), which is a different quantity."
+  },
+  {
+   "name": "pol_ii_elongation_rate",
+   "wanted": "nt/s in vivo",
+   "why_omitted": "Not needed for scaling the 3D view and not verified here. Do not put a speed in the UI from this file."
+  }
+ ]
+}

@@ -28,7 +28,7 @@ export const SOURCES = {
   wang2022:  { text: 'Wang et al. 2022 Cell: ~100 nt/s scanning (smFRET, yeast in vitro)', url: 'https://pubmed.ncbi.nlm.nih.gov/36334590/' },
   scan10:    { text: '10–20 nt/s scanning (single-molecule yeast scanning complexes)', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC11446271/' },
   vattem2004:{ text: 'Vattem & Wek 2004 PNAS: ATF4 uORF1 (3 codons) promotes reinitiation; uORF2 overlaps CDS; eIF2α-P delays TC re-acquisition', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC509193/' },
-  palam2011: { text: 'Palam, Baird & Wek 2011 J Biol Chem: CHOP uORF elongation stall controls stress induction', url: 'https://pubmed.ncbi.nlm.nih.gov/21285359/' },
+  palam2011: { text: 'Palam, Baird & Wek 2011 J Biol Chem: eIF2α-P lowers polysomes generally; CHOP induction is attributed to ribosomes bypassing its uORF due to poor start-site context', url: 'https://pubmed.ncbi.nlm.nih.gov/21285359/' },
   noderer2014:{ text: 'Noderer et al. 2014 Mol Syst Biol: TIS efficiency of all 65,536 −6..+5 contexts', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC4299517/' },
 };
 

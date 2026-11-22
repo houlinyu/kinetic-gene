@@ -112,6 +112,11 @@ export class Lane {
           if (!e.u) { // main ORF
             r.mode = 'cds'; this.proteins++; this.fates.main++; this.recent.push(this.t);
             this.events.push({ kind: 'protein', pos: e.pos });
+          } else if (e.u.type === 'in-frame-extension') {
+            // starts in-frame upstream of the main AUG -> makes an N-terminally extended protein.
+            // Score it here: its stop codon lies far inside the CDS, past where we stop tracking.
+            r.mode = 'cds'; this.proteins++; this.fates.main++; this.recent.push(this.t);
+            this.events.push({ kind: 'protein', pos: e.pos });
           } else {
             r.mode = 'uorf'; r.target = e.u.end; r.u = e.u;
             this.events.push({ kind: 'uorfInit', pos: e.pos });
@@ -126,9 +131,6 @@ export class Lane {
       r.pos = Math.min(r.pos + p.elongSpeed * dt, limit, r.target);
       if (r.pos >= r.target) {
         const u = r.u;
-        if (u.type === 'in-frame-extension') { // makes an N-terminally extended protein
-          this.proteins++; this.fates.main++; this.recent.push(this.t); r.mode = 'cds'; return;
-        }
         if (u.type === 'overlapping' || u.end > this.iso.len) {
           this.fates.overlapLoss++; r.done = true; return;
         }

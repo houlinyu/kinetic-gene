@@ -7,7 +7,8 @@ All sequences are RNA (A,C,G,U), 5'->3'. All positions are 0-based, half-open, r
 {
   "meta": { "generated": "ISO date", "gencode_or_ensembl_release": "...", "vienna_version": "...",
             "sources": [ { "key": "sample2019", "citation": "...", "url": "..." } ],
-            "methods": { "optimus": "...", "measured": "...", "tss_note": "..." } },   // free-text method notes
+            "methods": { "optimus": "...", "measured": "...", "tss_note": "...", "fold": "...", "motifs": "..." },  // free-text method notes
+            "ridge": { "models": {...}, "figures": ... } },   // data/ridge.json minus per_isoform (RIDGE agent, SPEC_v2); absent if no ridge.json
   "genes": [
     {
       "gene": "ATF4",
@@ -24,9 +25,20 @@ All sequences are RNA (A,C,G,U), 5'->3'. All positions are 0-based, half-open, r
           "main_kozak": { "score": 0.0-1.0, "class": "strong|adequate|weak", "method": "..." },
           "uorfs": [ { "start": 10, "end": 70, "aa": 19, "kozak_class": "strong|adequate|weak",
                        "type": "uORF|overlapping|in-frame-extension" } ],
-          "fold": { "mfe": -23.4, "dotbracket": "((((...))))...", "cap_dG": -5.1,   // cap_dG = MFE of first 50 nt
-                    "layout2d": [[x,y], ...] },                                    // one point per nt (RNAplot naview coords)
-          "hairpins": [ { "start": 5, "end": 40, "stem_bp": 9, "dG": -12.3 } ],   // stem-loops from dotbracket, dG of that local structure
+          "fold": { "method": "local folding: RNAplfold W=150 L=100 ...",   // see meta.methods.fold
+                    "mfe": -23.4,            // unrestricted global MFE of the UTR (unchanged v1 field)
+                    "mfe_global": -23.4,     // same value, explicit name
+                    "mfe_local": -21.0,      // MFE of the span-restricted structure below (max bp span 100)
+                    "dotbracket": "((((...))))...",   // LOCAL structure: MFE with max base-pair span 100 nt
+                    "cap_dG": -5.1,          // MFE of first 50 nt
+                    "layout2d": [[x,y], ...],          // naview coords of the local structure, centred, scaled to [-1,1]
+                    "punp": [0.12, 0.98, ...],         // per-nt unpaired probability (RNAplfold W=150 L=100), 2 decimals, len = len
+                    "acc_start": 0.51 },               // mean punp over the 30 nt around the main start (-15..+14, incl. CDS)
+          "hairpins": [ { "start": 5, "end": 40, "stem_bp": 9, "dG": -12.3 } ],   // stem-loops from the LOCAL dotbracket, dG of that local structure
+          "motifs": [ { "type": "uAUG|uORF_stop|nearcog|TOP|G4|TISU|kozak_main", "start": 24, "end": 27,   // 0-based half-open in the UTR
+                        "seq": "AUG", "label": "uAUG (weak) -> uORF", "strength": "strong|adequate|weak|null",
+                        "cite": "calvo2009", "note": "..." } ],   // pipeline/motifs.py find_motifs(); see meta.methods.motifs
+          "ridge": { "mrl_pred": 0.0, "contrib": [ ... ] },   // data/ridge.json per_isoform entry (SPEC_v2); null/absent if none
           "gc": 0.62,
           "pred": { "optimus_mrl": 5.67,            // Optimus 5-Prime predicted mean ribosome load (MPRA scale), cite sample2019
                     "optimus_input": "full",        // "full" (len <= 100) | "last100" (100 nt upstream of the start codon)
@@ -65,4 +77,11 @@ Field notes:
   HEK293T (Andreev 2015 data), PC3, muscle. `ambiguous` means identical TE for >= 2 isoforms of the gene in that table.
 - `pred.optimus_mrl`: predicted for the UTR inside the MPRA reporter (eGFP), trained on 25-100 nt UTRs; isoforms sharing
   the last 100 nt get identical predictions. See `meta.methods.optimus` for the validation r.
+- `motifs`: each type cites a verified source in `meta.sources` (uAUG/uORF_stop calvo2009, nearcog kearse2017 (only
+  CUG/GUG/ACG/UUG in strong -3R/+4G context), TOP thoreen2012 TOP-like rule (>= 5 pyrimidines starting within 4 nt of
+  the 5' end; Ensembl 5' ends are approximate), G4 huppert2005 (G3+N1-7 rule; kumari2007 = 5' UTR G4 represses
+  translation), TISU elfakess2008 (AAS-AUG-GCGGC, UTR <= 30 nt), kozak_main kozak1986). `kozak_main` always exactly one;
+  its `seq` and TISU `seq` extend into the CDS while `end` is clipped to `len`. PRTE and polyU are not reported (no
+  verified definition). Numeric features for the ridge model: `motifs.features()` (labels in `motifs.FEATURES`).
+- `fold` v2: structure is local (long-range pairs > 100 nt apart dropped), so `hairpins`/`layout2d` differ from v1.
 - `tss_note` is a coordinate heuristic (see `meta.methods.tss_note`), not a curated annotation.

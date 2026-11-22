@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { CDS_STUB } from './sim.js';
+import { motifsOf, motifStyle } from './motifs.js';
 
 export const COLORS = {
   bg: 0x0b0d12,
@@ -112,7 +113,10 @@ export class LaneView {
       }
       const g = new THREE.BufferGeometry();
       g.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
-      const mat = new THREE.LineBasicMaterial({ color: COLORS.pair, transparent: true, opacity: k >= 0 ? 0.35 : 0.14 });
+      // 28 entries in this data set have dG >= 0: not favourable structure, so they are not drawn
+      // as structure (the model still stalls on them - see the hover tooltip).
+      const unfav = k >= 0 && !(lane.hairpins[k]?.dG < 0);
+      const mat = new THREE.LineBasicMaterial({ color: COLORS.pair, transparent: true, opacity: k >= 0 ? (unfav ? 0.08 : 0.35) : 0.14 });
       const ls = new THREE.LineSegments(g, mat);
       this.content.add(ls);
       if (k >= 0) {
@@ -139,7 +143,30 @@ export class LaneView {
       bar.userData = { kind: 'uorf', idx, lane: this };
       this.content.add(bar); this.pickables.push(bar); this.uorfBars[idx] = bar;
     });
+    // motif spans: thin coloured ticks just under the strand
+    for (const mo of motifsOf(iso)) {
+      if (mo.type === 'kozak_main') continue;
+      const a = Math.max(0, mo.start), b = Math.min(mo.end, L);
+      const w = Math.max((b - a) * this.scale, 0.03);
+      const sp = new THREE.Mesh(new THREE.BoxGeometry(w, 0.035, 0.03),
+        new THREE.MeshBasicMaterial({ color: new THREE.Color(motifStyle(mo.type).color) }));
+      sp.position.set(this.X(a) + w / 2, -0.1, 0.02);
+      this.content.add(sp);
+    }
+    this._rowEnd = [];
     this.refreshToggles();
+  }
+
+  get titlePos() { return [this.x0, 1.55, 0]; }
+  get capPos() { return [this.x0 - 0.08, 0, 0]; }
+  get cdsPos() { return [this.X(this.lane.iso.len + CDS_STUB / 2), 0.5, 0]; }
+  // chips below the uORF rows; call in order of start; staggers into 3 rows to avoid overlap
+  motifAnchor(m) {
+    const x = this.X(Math.min(m.start, this.lane.iso.len)), W = 1.15;
+    let row = this._rowEnd.findIndex(e => e < x);
+    if (row < 0) row = this._rowEnd.length < 3 ? this._rowEnd.length : this._rowEnd.indexOf(Math.min(...this._rowEnd));
+    this._rowEnd[row] = x + W;
+    return { pos: [x, -0.62 - row * 0.27, 0], center: [0, 0.5], leader: true };
   }
 
   refreshToggles() {
@@ -151,7 +178,7 @@ export class LaneView {
     });
     lane.hairpins.forEach((h, i) => {
       const a = this.arcGroups[i]; if (!a) return;
-      a.material.opacity = h.melted ? 0.06 : 0.35;
+      a.material.opacity = h.melted ? 0.06 : (h.dG < 0 ? 0.35 : 0.08);
     });
   }
 

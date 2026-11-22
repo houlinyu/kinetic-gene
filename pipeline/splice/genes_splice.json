@@ -1,0 +1,38 @@
+{
+  "_comment": "Gene set for data/splice_data.json. 'from_tab1': take the isoform ids already in data/utr_data.json (so tab 2 joins tab 1). 'extra': additional unversioned ENSTs to include (documented alternative-splicing events). Every 'event' string must be supported by the cite key(s), which must exist in SOURCES in build_splice.py.",
+  "genes": [
+    {"gene": "ATF4",     "from_tab1": true},
+    {"gene": "ATF5",     "from_tab1": true},
+    {"gene": "DDIT3",    "from_tab1": true},
+    {"gene": "PPP1R15A", "from_tab1": true},
+    {"gene": "BACE1",    "from_tab1": true},
+    {"gene": "MDM2",     "from_tab1": true},
+    {"gene": "ERBB2",    "from_tab1": true},
+    {"gene": "ESR1",     "from_tab1": true},
+
+    {"gene": "MAPT", "from_tab1": false,
+     "extra": ["ENST00000334239", "ENST00000446361", "ENST00000420682", "ENST00000351559"],
+     "event": "Cassette exons 2 and 3 of MAPT add N-terminal inserts of 29 or 58 amino acids (0N/1N/2N tau); exon 3 is never included without exon 2.",
+     "cite": ["goedert1989", "arikan2002"],
+     "iso_names": {"ENST00000334239": "0N3R tau (fetal)", "ENST00000446361": "0N4R tau",
+                   "ENST00000420682": "1N4R tau", "ENST00000351559": "2N4R tau"}},
+
+    {"gene": "CDKN2A", "from_tab1": false,
+     "extra": ["ENST00000304494", "ENST00000579755"],
+     "event": "The two proteins of the CDKN2A locus, p16INK4a and p14ARF, are specified by translating the common second exon in alternative reading frames; each transcript starts at its own first exon (1alpha or 1beta), so the 5' UTR and the protein N-terminus both differ.",
+     "cite": ["stott1998", "quelle1995"],
+     "iso_names": {"ENST00000304494": "p16INK4a (exon 1alpha)", "ENST00000579755": "p14ARF (exon 1beta)"}},
+
+    {"gene": "TP63", "from_tab1": false,
+     "extra": ["ENST00000264731", "ENST00000354600"],
+     "event": "TP63 encodes multiple isotypes; the predominant p63 isotypes in many epithelial tissues (deltaNp63) lack the acidic N terminus corresponding to the transactivation domain of p53. The deltaNp63 transcript begins at an internal first exon that lies inside TAp63 intron 3 (Ensembl/GENCODE GRCh38 annotation).",
+     "cite": ["yang1998", "ensembl"],
+     "iso_names": {"ENST00000264731": "TAp63alpha", "ENST00000354600": "deltaNp63alpha"}},
+
+    {"gene": "TP53", "from_tab1": true,
+     "extra": ["ENST00000504937", "ENST00000509690"],
+     "event": "The human p53 gene contains an internal promoter in intron 4 that transcribes the delta133p53 variants, whose coding sequence starts at codon 133, giving a different 5' UTR and N terminus.",
+     "cite": ["bourdon2005"],
+     "iso_names": {"ENST00000504937": "delta133p53alpha", "ENST00000509690": "delta133p53"}}
+  ]
+}

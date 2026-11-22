@@ -1,0 +1,97 @@
+{
+  "format": "utr-race/struct-provenance-v1",
+  "generated": "2026-11-22",
+  "what": "Provenance for every experimental structure used to build the files in app/public/struct/. All geometry is derived from these deposited cryo-EM models; no coordinates were invented or modelled by us. Show this when the 3D view displays a ribosome.",
+  "license": "PDB data are freely available (wwPDB; no restrictions on use or redistribution).",
+  "license_url": "https://www.rcsb.org/pages/usage-policy",
+  "attribution_line_short": "Human 48S initiation complex, PDB 8PJ1 (Petrychenko et al., Nat Struct Mol Biol 2025) - PDB data are freely available",
+  "structures": [
+    {
+      "role": "primary",
+      "asset": "43s.json",
+      "pdb_id": "8PJ1",
+      "title": "Structure of human 48S translation initiation complex in open codon scanning state (48S-1)",
+      "method": "ELECTRON MICROSCOPY (single-particle cryo-EM)",
+      "resolution_A": 3.4,
+      "resolution_method": "FSC 0.143 CUT-OFF",
+      "organism": "Homo sapiens (all polymer entities annotated Homo sapiens in RCSB; reconstituted in vitro from human components, with a synthetic model mRNA)",
+      "emdb_id": "EMD-17696",
+      "deposited": "2023-06-22",
+      "released": "2024-08-14",
+      "contents": "40S small subunit (18S rRNA + 34 protein chains incl. RACK1, eL41 and the ubiquitin moiety of eS31), mRNA (47 nt modelled), initiator Met-tRNAi, eIF1, eIF1A, eIF2 (alpha/beta/gamma), eIF3 (12 subunits: a,b,c,d,e,f,g,h,i,k,l,m)",
+      "why_chosen": "Human, high resolution, and it is the OPEN CODON-SCANNING state: a 43S/48S pre-initiation complex with mRNA threaded through the 40S channel and the start codon not yet in the P site. That is exactly the state a scanning simulation depicts, and it is the only state in this series where the mRNA is caught mid-scan.",
+      "citation": "Petrychenko V, Yi SH, Liedtke D, Peng BZ, Rodnina MV, Fischer N. Structural basis for translational control by the human 48S initiation complex. Nat Struct Mol Biol 32:62-72 (2025).",
+      "doi": "10.1038/s41594-024-01378-4",
+      "pubmed": "39289545",
+      "url": "https://www.rcsb.org/structure/8PJ1",
+      "cif_url": "https://files.rcsb.org/download/8PJ1.cif.gz",
+      "paper_url": "https://doi.org/10.1038/s41594-024-01378-4",
+      "notes": [
+        "An Author Correction to this paper was published: Nat Struct Mol Biol 33:724 (2026), doi:10.1038/s41594-026-01777-9. We have not read it; check it before quoting figures or numbers from the original paper. It does not affect the deposited coordinates we use.",
+        "mRNA residue numbering is the depositors' construct numbering (255-nt entity; residue 0 is skipped), NOT numbering relative to the AUG.",
+        "In this state the construct's ACCACC-AUG-G start codon sits at author residues 18-20; only its A (18) and U (19) are modelled, at the 3' (entry-channel) edge of the resolved path."
+      ],
+      "sibling_states_same_paper": {
+        "note": "The other states of the same pathway, if a later build wants an AUG-recognised or post-hydrolysis frame.",
+        "entries": [
+          {"pdb_id": "8PJ2", "resolution_A": 3.4, "title": "AUG recognition state after eIF5-induced GTP hydrolysis by eIF2 (48S-2)"},
+          {"pdb_id": "8PJ3", "resolution_A": 3.7, "title": "upon transfer of initiator tRNA to eIF5B (48S-3)"},
+          {"pdb_id": "8PJ4", "resolution_A": 3.2, "title": "after eIF5 release (48S-4)"},
+          {"pdb_id": "8PJ5", "resolution_A": 2.9, "title": "after eIF2 release prior to 60S subunit joining (48S-5)"},
+          {"pdb_id": "8PJ6", "resolution_A": 2.9, "title": "with initiator tRNA, eIF1A and eIF3 (off-pathway)"}
+        ]
+      }
+    },
+    {
+      "role": "secondary - mRNA entry channel with the eIF4F helicase",
+      "asset": "48s_eif4f.json",
+      "pdb_id": "8OZ0",
+      "title": "Structure of a human 48S translation initiation complex with eIF4F and eIF4A",
+      "method": "ELECTRON MICROSCOPY (single-particle cryo-EM)",
+      "resolution_A": 3.5,
+      "organism": "Homo sapiens",
+      "emdb_id": "EMD-17297",
+      "deposited": "2023-05-06",
+      "released": "2024-02-07",
+      "contents": "40S subunit, mRNA (50 nt modelled, author residues 79-128, with the AUG at 106-108), initiator Met-tRNAi, eIF1A, eIF2, eIF3, eIF5, eIF4G1 and TWO copies of eIF4A-I",
+      "why_chosen": "Included because it shows the mRNA entry channel occupied: in our derived asset the 3'-most modelled mRNA nucleotide lies 10.1 A from an eIF4A-I copy, i.e. the helicase sits directly at the entry channel feeding mRNA in. Useful as the 'mRNA being pulled in' reference.",
+      "citation": "Brito Querido J, Sokabe M, Diaz-Lopez I, Gordiyenko Y, Fraser CS, Ramakrishnan V. The structure of a human translation initiation complex reveals two independent roles for the helicase eIF4A. Nat Struct Mol Biol 31:455-464 (2024).",
+      "doi": "10.1038/s41594-023-01196-0",
+      "pubmed": "38287194",
+      "url": "https://www.rcsb.org/structure/8OZ0",
+      "cif_url": "https://files.rcsb.org/download/8OZ0.cif.gz",
+      "notes": [
+        "eIF1 is not modelled in this entry.",
+        "Its asset is in its OWN oriented frame (same convention, recomputed from its own mRNA path and 40S centroid); do not assume the two assets are superimposed."
+      ]
+    }
+  ],
+  "considered_not_used": [
+    {
+      "pdb_id": "6ZMW",
+      "resolution_A": 3.7,
+      "title": "Structure of a human 48S translational initiation complex",
+      "citation": "Brito Querido J, et al. Science 369:1220-1227 (2020). PMID 32883864.",
+      "url": "https://www.rcsb.org/structure/6ZMW",
+      "why_not": "Excellent human 48S with eIF4G1/eIF4A, but its modelled mRNA is only 28 nt and is a poly-A stretch, so it reads less well as 'an mRNA being scanned'."
+    },
+    {
+      "pdb_id": "7QP7",
+      "resolution_A": 3.7,
+      "title": "Structure of the human 48S initiation complex in closed state (h48S AUG closed)",
+      "citation": "Yi SH, et al. Nucleic Acids Res 50:5282 (2022).",
+      "url": "https://www.rcsb.org/structure/7QP7",
+      "why_not": "Closed (post-AUG-recognition) state; we wanted the scanning state."
+    },
+    {
+      "pdb_id": "7A09",
+      "resolution_A": 3.5,
+      "title": "Structure of a human ABCE1-bound 43S pre-initiation complex - State III",
+      "citation": "Kratzat H, et al. EMBO J 40:e105179 (2021).",
+      "url": "https://www.rcsb.org/structure/7A09",
+      "why_not": "A genuine native human 43S PIC, but it carries ABCE1 rather than a scanned mRNA."
+    }
+  ],
+  "sources_for_constants": "See constants.json; each constant carries its own citation and URL.",
+  "scope": "This file covers the TRANSLATION assets only (43s.json, 48s_eif4f.json) plus constants.json. Other files in app/public/struct/ (e.g. polii.json, spliceosome.json) were produced by a different pipeline and are NOT documented here; get their provenance from whoever built them before displaying a citation for them."
+}

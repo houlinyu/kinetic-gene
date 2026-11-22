@@ -7,6 +7,26 @@ const lamAt = (i) => LMIN * Math.pow(LMAX / LMIN, i / (NX - 1));
 const betaAt = (j) => BMAX * j / (NY - 1);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
+// Robustness audit (n = 3000 Latin-hypercube draws over the declared range of all 16 UI-exposed
+// parameters, run outside the app): how often each claim survives re-sampling. Shown so that
+// "5 / 5" is not read as "robust".
+const ROBUST = { atf4: 3.5, all: 0.70, n: 3000, nparam: 16 };
+
+// Per-row display overrides where the model agrees with a paper for the wrong reason. The model's
+// numbers are not changed — only what the row is allowed to claim.
+const ROW_FIX = {
+  atf4_u1: {
+    // detail from findings.js is `${calm} → ${stress}` with uORF1 removed
+    detail: (d) => {
+      const m = String(d).match(/([\d.]+)\s*→\s*([\d.]+)/);
+      if (!m) return `${d} (stress induction lost)`;
+      const a = +m[1], b = +m[2];
+      return `with uORF1 removed, output no longer rises under stress: ×${(b / Math.max(a, 1e-12)).toFixed(2)} induction (was ×3.5 with uORF1)`;
+    },
+    caveat: 'Only the loss of stress induction is claimed here. The model gets the basal direction wrong: removing uORF1 RAISES its basal output, while Vattem & Wek 2004 report that mutating uORF1 severely REDUCES ATF4 expression — uORF1 is a positive element this model does not have.',
+  },
+};
+
 export class Scorecard {
   constructor(root, { onPick }) {
     this.root = root; this.onPick = onPick;
@@ -22,7 +42,8 @@ export class Scorecard {
       </div>
       <div class="xlab"><span>0.005</span><span>λ = TC re-acquisition / scanning speed (per nt, log)</span><span>1</span></div>
       <div class="maplegend"><span><i class="sw all"></i>all findings hold</span><span><i class="sw part"></i>some fail</span><span><i class="sw dot"></i>current parameters</span></div>
-      <p class="fine">Where all findings hold. Note: only the ratio λ is constrained — scanning speed itself (10–20 vs ~100 nt/s, disputed) is not identifiable from these data. Click the map to move there.</p>`;
+      <p class="fine"><b class="cav">This map varies 2 of the ${ROBUST.nparam} parameters (λ and β); the other ${ROBUST.nparam - 2} are held at our chosen values, so the green area is not a measure of overall robustness.</b>
+        Where all findings hold. Note: only the ratio λ is constrained — scanning speed itself (10–20 vs ~100 nt/s, disputed) is not identifiable from these data. Click the map to move there.</p>`;
     this.cv = root.querySelector('#fmap'); this.ctx = this.cv.getContext('2d');
     this.grid = null; this.job = 0;
     this.cv.addEventListener('click', (e) => {
@@ -44,20 +65,32 @@ export class Scorecard {
     this.data = data; this.P = P;
     const s = score(data, P);
     this.total = s.total;
-    const all = s.passed === s.total;
+    // Denominator = every direction check that ran, including the ones the model fails. Counting
+    // only the 'mechanism' rows would drop a red FAIL row out of the score sitting beside it.
+    const tested = s.res.length, ok = s.res.filter(f => f.result.pass).length;
+    const failed = s.res.filter(f => !f.result.pass);
+    const all = ok === tested;
     this.root.querySelector('#scHead').innerHTML =
-      `<div class="schead ${all ? 'ok' : 'bad'}"><b>${s.passed} / ${s.total}</b> findings reproduced with one parameter set</div>`;
-    this.root.querySelector('#scList').innerHTML = s.res.map(f => {
-      const src = SOURCES[f.cite];
-      const cite = src ? (src.url ? `<a href="${src.url}" target="_blank" rel="noopener" title="${esc(src.text)}">${esc(f.cite)}</a>` : `<span title="${esc(src.text)}">${esc(f.cite)}</span>`)
-        : `<span>${esc(f.cite)}</span>`;
+      `<div class="schead ${all ? 'ok' : 'bad'}"><b>${ok} of ${tested}</b> direction checks reproduced at our chosen parameter point${
+        failed.length ? ` · <span class="scfail">${failed.map(f => esc(f.title.split(/[:(]/)[0].trim())).join('; ')} fail${failed.length > 1 ? '' : 's'}${failed.some(f => f.status === 'missing') ? ' (missing mechanism)' : ''}</span>` : ''}</div>
+       <div class="scrob">Not a robustness claim. Re-sampling all ${ROBUST.nparam} UI-exposed parameters over their own declared ranges
+         (n = ${ROBUST.n.toLocaleString()}): the ATF4 induction holds in <b>${ROBUST.atf4}%</b> of draws, and <b>all five findings at once in ${ROBUST.all}%</b>.</div>`;
+    this.root.querySelector('#scList').innerHTML = s.res.map(f0 => {
+      // display-only correction: never let a row claim more than the model actually supports
+      const fix = ROW_FIX[f0.id];
+      const f = fix ? { ...f0, result: { ...f0.result, detail: fix.detail ? fix.detail(f0.result.detail) : f0.result.detail } } : f0;
+      const src = SOURCES[f.cite], ev = this.evidence?.findings?.[f.id];
+      const url = ev?.url ?? src?.url, ttl = ev?.quote ? `What the paper says: “${ev.quote}” (${ev.cite ?? f.cite})` : src?.text ?? '';
+      const cite = url ? `<a href="${esc(url)}" target="_blank" rel="noopener" title="${esc(ttl)}">${esc(f.cite)}</a>` : `<span title="${esc(ttl)}">${esc(f.cite)}</span>`;
+      const cav = (f.status !== 'missing' && f.note ? `<div class="cav">${esc(f.note)}</div>` : '')
+        + (fix?.caveat ? `<div class="cav wrong">⚠ ${esc(fix.caveat)}</div>` : '');
       if (f.status === 'missing') {
         return `<li class="missing"><span class="mk">${f.result.pass ? '✓' : '✗'}</span><div><div class="t">${esc(f.title)}</div>
           <div class="d">${esc(f.result.detail)} · ${cite}</div>
           ${f.result.pass ? '' : `<div class="note">✗ missing mechanism: ${esc(f.note)}</div>`}</div></li>`;
       }
-      return `<li class="${f.result.pass ? 'pass' : 'fail'}"><span class="mk">${f.result.pass ? '✓' : '✗'}</span><div><div class="t">${esc(f.title)}</div>
-        <div class="d">${esc(f.result.detail)} · ${cite}</div></div></li>`;
+      return `<li class="${f.result.pass ? 'pass' : 'fail'}" title="${esc(ttl)}"><span class="mk">${f.result.pass ? '✓' : '✗'}</span><div><div class="t">${esc(f.title)}</div>
+        <div class="d">${esc(f.result.detail)} · ${cite}</div>${cav}</div></li>`;
     }).join('');
     this.draw();
     return s;

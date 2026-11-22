@@ -6,7 +6,7 @@ Usage:
     python pipeline/build_data.py ATF4 MYC        # genes from the CLI
     python pipeline/build_data.py --max-iso 6 --no-cache ATF4
 
-Data source: Ensembl REST API (GRCh38). Folding: ViennaRNA (RNAfold defaults, 37 C).
+Data source: Ensembl REST API (GRCh38). Folding: ViennaRNA (RNAplfold W=150 L=100 + span-limited MFE; global MFE kept). --merge-only merges data/ridge.json.
 Ensembl responses are cached in pipeline/cache/ so reruns are fast and offline-capable.
 """
 import argparse
@@ -24,6 +24,7 @@ import RNA
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import measured  # noqa: E402  (Cao et al. 2021 TE tables)
 import optimus  # noqa: E402  (numpy Optimus 5-Prime, Sample et al. 2019)
+import motifs  # noqa: E402  (sequence motifs / features, data/SPEC_v2.md)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -356,6 +357,16 @@ def find_hairpins(db, seq, min_bp=3):
 
 
 
+def pairs_of(db):
+    st, out = [], []
+    for i, c in enumerate(db):
+        if c == "(":
+            st.append(i)
+        elif c == ")":
+            out.append((st.pop(), i))
+    return out
+
+
 def layout(db):
     RNA.cvar.rna_plot_type = RNA.PLOT_TYPE_NAVIEW
     c = RNA.get_xy_coordinates(db)
@@ -366,12 +377,34 @@ def layout(db):
     return [[round((x - cx) / m, 4), round((y - cy) / m, 4)] for x, y in xy]
 
 
+PLF_W, PLF_L = 150, 100
+FOLD_METHOD = (f"local folding: per-nt unpaired probabilities from RNAplfold (RNA.pfl_fold_up, W={PLF_W}, "
+               f"L={PLF_L}, ulength 1) on the UTR + first 30 nt of CDS (punp reported for the UTR only); structure "
+               f"(dotbracket, layout2d, hairpins) = MFE with maximal base-pair span {PLF_L} nt (RNAfold --maxBPspan "
+               f"{PLF_L}), so long-range pairs are dropped. mfe / mfe_global = unrestricted global MFE (old field, "
+               "kept for reference); mfe_local = MFE of the span-restricted structure. ViennaRNA default energy "
+               "parameters, 37 C.")
+ACC_FLANK = 15
+
+
+def local_fold(utr, cds):
+    md = RNA.md()
+    md.max_bp_span = PLF_L
+    db, mfe_local = RNA.fold_compound(utr, md).mfe()
+    seq = utr + cds[:30]
+    up = RNA.pfl_fold_up(seq, 1, PLF_W, PLF_L)  # 1-based; up[i][1] = P(i unpaired)
+    pu = [up[i + 1][1] for i in range(len(seq))]
+    L = len(utr)
+    win = pu[max(0, L - ACC_FLANK):L + ACC_FLANK]
+    return db, mfe_local, [round(x, 2) for x in pu[:L]], sum(win) / len(win)
+
+
 def analyse(t):
     utr, cds = t["utr5"], t["cds"]
     L = len(utr)
     t0 = time.time()
-    fc = RNA.fold_compound(utr)
-    db, mfe = fc.mfe()
+    db_g, mfe = RNA.fold_compound(utr).mfe()
+    db, mfe_local, punp, acc = local_fold(utr, cds)
     fold_s = time.time() - t0
     cap_db, cap_mfe = RNA.fold_compound(utr[:50]).mfe()
     ctx = ("N" * max(0, 6 - L) + utr[-6:]) + cds[:4]
@@ -384,14 +417,56 @@ def analyse(t):
         "cds_context": ctx,
         "main_kozak": {"score": None, "class": kozak_class(utr + cds, L), "method": KOZAK_METHOD},
         "uorfs": find_uorfs(utr, cds),
-        "fold": {"mfe": round(mfe, 2), "dotbracket": db, "cap_dG": round(cap_mfe, 2),
-                 "layout2d": layout(db)},
+        "fold": {"method": FOLD_METHOD, "mfe": round(mfe, 2), "mfe_global": round(mfe, 2),
+                 "mfe_local": round(mfe_local, 2), "dotbracket": db, "cap_dG": round(cap_mfe, 2),
+                 "layout2d": layout(db), "punp": punp, "acc_start": round(acc, 3)},
         "hairpins": find_hairpins(db, utr),
         "gc": round(sum(utr.count(x) for x in "GC") / L, 4),
         "pred": {"optimus_mrl": None, "optimus_input": None, "utrlm_te": None},
         "measured": measured.lookup(t["id"]),
         "tss_note": None,
+        "motifs": motifs.find_motifs(utr, cds),
     }, fold_s
+
+
+MOTIF_METHOD = ("pipeline/motifs.py find_motifs(); positions 0-based half-open in the 5' UTR. uAUG (strength = Kozak "
+                "class, -3 purine / +4 G; cite calvo2009) with uORF_stop for uORFs ending in the UTR; nearcog = CUG/GUG/"
+                "ACG/UUG in strong context only (kearse2017); TOP = >= 5 pyrimidines starting within 4 nt of the 5' end "
+                "(TOP-like rule of thoreen2012; Ensembl 5' ends are approximate); G4 = (G3+N1-7){3,}G3+ "
+                "(huppert2005 folding rule; kumari2007 for 5' UTR translational repression), not structure-tested; "
+                "TISU = AAS-AUG-GCGGC at the main start for UTR <= 30 nt (elfakess2008); kozak_main = -6..+4 context "
+                "(kozak1986). Dropped (no definition verified in time): PRTE, polyU.")
+
+
+def merge_ridge(data, path=None):
+    """Merge data/ridge.json (RIDGE agent) into isoform.ridge + meta.ridge. Returns problems list."""
+    path = path or os.path.join(ROOT, "data", "ridge.json")
+    if not os.path.exists(path):
+        return []
+    rj = json.load(open(path))
+    per = rj.get("per_isoform", {}) or {}
+    probs, n = [], 0
+    for g in data["genes"]:
+        for iso in g["isoforms"]:
+            r = per.get(iso["id"]) or per.get(iso["id"].split(".")[0])
+            iso["ridge"] = r
+            n += r is not None
+    data["meta"]["ridge"] = {k: v for k, v in rj.items() if k != "per_isoform"}
+    keys = {i["id"] for g in data["genes"] for i in g["isoforms"]} | {i["id"].split(".")[0] for g in data["genes"] for i in g["isoforms"]}
+    missing = [k for k in per if k not in keys]
+    if missing:
+        probs.append(f"ridge.json: {len(missing)} per_isoform ids not in data (e.g. {missing[:3]})")
+    print(f"merged ridge.json: {n} isoforms with ridge, models {list(rj.get('models', {}))}")
+    return probs
+
+
+def write_out(data):
+    os.makedirs(os.path.dirname(OUT_DATA), exist_ok=True)
+    os.makedirs(os.path.dirname(OUT_APP), exist_ok=True)
+    with open(OUT_DATA, "w") as fh:
+        json.dump(data, fh, separators=(",", ":"))
+    shutil.copyfile(OUT_DATA, OUT_APP)
+    print(f"\nwrote {OUT_DATA} ({os.path.getsize(OUT_DATA)/1e6:.2f} MB) and {OUT_APP}")
 
 
 # --------------------------------------------------------------------------- main
@@ -402,7 +477,17 @@ def main():
     ap.add_argument("--genes-file", default=os.path.join(HERE, "genes.txt"))
     ap.add_argument("--max-iso", type=int, default=6)
     ap.add_argument("--no-cache", action="store_true")
+    ap.add_argument("--merge-only", action="store_true",
+                    help="reload data/utr_data.json, merge data/ridge.json, write both copies")
     args = ap.parse_args()
+    if args.merge_only:
+        data = json.load(open(OUT_DATA))
+        probs = merge_ridge(data)
+        write_out(data)
+        if probs:
+            print("RIDGE MERGE PROBLEMS:\n  " + "\n  ".join(probs))
+            sys.exit(1)
+        return
     USE_CACHE = not args.no_cache
     genes = args.genes or [l.split("#")[0].strip() for l in open(args.genes_file)]
     genes = [g for g in genes if g]
@@ -439,13 +524,27 @@ def main():
                 for u in rec["uorfs"]:
                     if not (0 <= u["start"] < L and u["end"] > u["start"]) or rec["utr5"][u["start"]:u["start"] + 3] != "AUG":
                         problems.append(f"{g} {rec['id']}: uORF out of range {u}")
+                if len(rec["fold"]["punp"]) != L or not all(0 <= x <= 1 for x in rec["fold"]["punp"]):
+                    problems.append(f"{g} {rec['id']}: punp len/range bad")
+                if not (0 <= rec["fold"]["acc_start"] <= 1):
+                    problems.append(f"{g} {rec['id']}: acc_start out of range")
+                if any(abs(i - j) > PLF_L for i, j in pairs_of(rec["fold"]["dotbracket"])):
+                    problems.append(f"{g} {rec['id']}: base pair span > {PLF_L}")
+                if sum(m["type"] == "kozak_main" for m in rec["motifs"]) != 1:
+                    problems.append(f"{g} {rec['id']}: kozak_main count != 1")
+                for m in rec["motifs"]:
+                    if not (0 <= m["start"] < m["end"] <= L) or m["cite"] not in motifs.SOURCES:
+                        problems.append(f"{g} {rec['id']}: motif out of range / uncited {m}")
+                    elif m["type"] in ("uAUG", "uORF_stop", "nearcog", "G4", "TOP") and rec["utr5"][m["start"]:m["end"]] != m["seq"]:
+                        problems.append(f"{g} {rec['id']}: motif seq mismatch {m}")
                 for h in rec["hairpins"]:
                     if not (0 <= h["start"] < h["end"] <= L):
                         problems.append(f"{g} {rec['id']}: hairpin out of range {h}")
                 ty = [u["type"] for u in rec["uorfs"]]
                 details.append(f"{rec['name']}{'*' if 'MANE_Select' in rec['tags'] else ''} "
                                f"{L}nt {len(ty)}[{ty.count('uORF')}/{ty.count('overlapping')}/"
-                               f"{ty.count('in-frame-extension')}] {rec['fold']['mfe']} {rec['fold']['cap_dG']}"
+                               f"{ty.count('in-frame-extension')}] {rec['fold']['mfe']}/{rec['fold']['mfe_local']} "
+                               f"{rec['fold']['cap_dG']} hp{len(rec['hairpins'])} m{len(rec['motifs'])}"
                                + (f" fold={fs:.1f}s" if L > 1000 else ""))
             gn = NOTES["genes"].get(g, {})
             out_genes.append({"gene": g, "blurb": gn.get("blurb", ""), "cite": gn.get("cite", []), "isoforms": isos})
@@ -473,11 +572,14 @@ def main():
                  "production in non-viral gene therapies. Nat Commun 12:4138 (2021). TE tables from "
                  "github.com/zzz2010/5UTR_Optimizer (MIT)",
                  "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC8260622/"},
-            ] + [dict(key=k, **v) for k, v in NOTES["sources"].items()],
+            ] + [dict(key=k, **v) for k, v in NOTES["sources"].items()]
+              + [dict(key=k, **v) for k, v in motifs.SOURCES.items() if k not in NOTES["sources"]],
             "methods": {
                 "optimus": optimus_method(),
                 "measured": measured.NOTE,
                 "tss_note": TSS_METHOD,
+                "fold": FOLD_METHOD,
+                "motifs": MOTIF_METHOD,
             },
         },
         "genes": out_genes,
@@ -491,19 +593,15 @@ def main():
                 problems.append(f"finding {f['id']}: {side} {f[side]} not among {f['gene']} isoforms")
         if f["cite"] not in keys:
             problems.append(f"finding {f['id']}: cite {f['cite']} not in meta.sources")
-    os.makedirs(os.path.dirname(OUT_DATA), exist_ok=True)
-    os.makedirs(os.path.dirname(OUT_APP), exist_ok=True)
-    with open(OUT_DATA, "w") as fh:
-        json.dump(data, fh, separators=(",", ":"))
-    shutil.copyfile(OUT_DATA, OUT_APP)
-    print(f"\nwrote {OUT_DATA} ({os.path.getsize(OUT_DATA)/1e6:.2f} MB) and {OUT_APP}")
+    problems += merge_ridge(data)
+    write_out(data)
     print("* = MANE_Select; uORF counts [fully-upstream/overlapping-CDS/in-frame-extension]")
     if failed:
         print("FAILED genes:", failed)
     if problems:
         print("SANITY PROBLEMS:\n  " + "\n  ".join(problems))
         sys.exit(1)
-    print("sanity checks passed (layout2d/dotbracket length == len, positions in range, start codon at cds_context[6:9])")
+    print("sanity checks passed (layout2d/dotbracket/punp length == len, pair span <= 100, motif/uORF/hairpin positions in range, start codon at cds_context[6:9])")
 
 
 if __name__ == "__main__":

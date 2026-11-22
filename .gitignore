@@ -6,3 +6,9 @@ pipeline/cache/
 pipeline/external/
 __pycache__/
 *.pyc
+pipeline/*/dl/
+pipeline/*/work/
+pipeline/discovery/dl/
+pipeline/*/downloads/
+pipeline/*/external/
+pipeline/*/cache/

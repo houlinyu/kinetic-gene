@@ -1,0 +1,150 @@
+{
+  "format": "utr-race/struct-constants-v1",
+  "note": "Real, sourced physical constants for scaling the 3D view. Every entry was read in the cited full text or measured from the cited deposited coordinates. Nothing here is a remembered textbook value: numbers that could not be verified against a source are listed in `omitted` instead of being guessed.",
+  "generated": "2026-11-22",
+  "constants": [
+    {
+      "name": "a_form_rna_rise_per_bp",
+      "value": 2.8,
+      "tolerance": 0.1,
+      "unit": "A",
+      "label": "A-form dsRNA axial rise per base pair",
+      "note": "dsRNA consensus helical rise in solution with monovalent ions.",
+      "evidence": "\"the dsRNA consensus helical rise in solution containing monovalent ions (2.8 +/- 0.1 A ...)\"",
+      "source": {
+        "citation": "Dohnalova H, Seifert M, Matouskova E, Klein M, Papini FS, Lipfert J, Dulin D, Lankas F. Temperature-Dependent Twist of Double-Stranded RNA Probed by Magnetic Tweezer Experiments and Molecular Dynamics Simulations. J Phys Chem B 128:664-675 (2024). doi:10.1021/acs.jpcb.3c06280, PMID 38197365.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10823466/"
+      }
+    },
+    {
+      "name": "a_form_rna_bp_per_turn",
+      "value": 11,
+      "unit": "bp/turn",
+      "label": "A-form RNA base pairs per helical turn",
+      "note": "Canonical A-RNA periodicity; the cited crystal structure measures 10.96 bp/turn for its A-form helix.",
+      "evidence": "\"... the double helix exhibits A-RNA conformation with helical periodicity of 10.96 bp, similar to canonical A-RNA, which has 11 bp per helical turn\"",
+      "source": {
+        "citation": "Garg A, Heinemann U. A novel form of RNA double helix based on G.U and C.A+ wobble base pairing. RNA 24:209-218 (2018). doi:10.1261/rna.064048.117, PMID 29122970.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5769748/"
+      }
+    },
+    {
+      "name": "a_form_rna_helix_diameter",
+      "value": 19.5,
+      "unit": "A",
+      "label": "A-form RNA duplex diameter (phosphate-to-phosphate convention)",
+      "note": "CONVENTION-DEPENDENT. This is the duplex diameter used as a model parameter in the cited work (1.95 nm). The commonly quoted ~23 A refers to a van-der-Waals-inclusive convention and could not be traced to a source, so it is not given here. Use ~20 A if you need one citable number.",
+      "evidence": "\"D = 1.95 nm is RNA diameter\"",
+      "source": {
+        "citation": "Tian FJ, Zhang C, Zhou E, Dong HL, Tan ZJ, Zhang XH, Dai L. Universality in RNA and DNA deformations induced by salt, temperature change, stretching force, and protein binding. PNAS 120:e2218425120 (2023). doi:10.1073/pnas.2218425120, PMID 37155848.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC10193934/"
+      }
+    },
+    {
+      "name": "ssrna_rise_per_nt_extended",
+      "value": 5.9,
+      "unit": "A",
+      "label": "Fully extended single-stranded RNA, length per nucleotide",
+      "note": "Quoted in the cited paper (0.59 nm/nt) for a fully extended ssRNA conformation. Its own reference for the value is Qu X, Lancaster L, Noller HF, Bustamante C, Tinoco I, PNAS 109:14458 (2012), whose full text could not be opened, so the value is attributed to the source actually read.",
+      "evidence": "\"... assuming a fully extended single-stranded RNA conformation (0.59 nm per nucleotide)\"",
+      "source": {
+        "citation": "Mahmud SMN, Umeda K, Das T, Shoukat N, Kodera N, Sato H. HS-AFM Reveals Hierarchical RNA Folding Driving Condensate Assembly and Material States. Small 22:e75409 (2026). doi:10.1002/smll.75409, PMID 42634344.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC13711478/"
+      }
+    },
+    {
+      "name": "mrna_nt_in_40S_channel",
+      "value": 24,
+      "unit": "nt",
+      "label": "mRNA nucleotides spanned by the scanning 40S channel (human TCP-seq, 40S alone)",
+      "note": "Scanning 40S footprints are heterogeneous: from ~24 nt (the span of the 40S alone) up to ~70 nt when factors are bound or complexes queue; the paper also refers to a 'typical 40S FP (~30 nt)'.",
+      "evidence": "\"protecting mRNA fragments from a size corresponding approximately to the span of the 40S alone (~24 nt) up to ~70 nt\"",
+      "source": {
+        "citation": "Wagner S, Herrmannova A, Hronova V, et al. Mol Cell 79:546-560.e7 (2020). doi:10.1016/j.molcel.2020.06.004, PMID 32589964.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7447980/"
+      }
+    },
+    {
+      "name": "s40_max_dimension",
+      "value": 27.4,
+      "unit": "nm",
+      "label": "Human 40S subunit maximum dimension",
+      "note": "MEASURED: largest distance between any two backbone trace atoms (18S rRNA P, protein CA) of the 40S core (18S rRNA + 40S proteins) in PDB 8PJ1. The extreme pair lies within the 18S rRNA itself (human 18S expansion segments), not in a flexible protein tail. Extents along the subunit's own principal axes, same point set: 26.9 x 18.8 x 15.0 nm. Note that figures of ~23 nm quoted elsewhere usually describe the compact core without expansion segments.",
+      "source": {
+        "citation": "Measured from PDB 8PJ1 (Petrychenko et al., Nat Struct Mol Biol 32:62-72 (2025), doi:10.1038/s41594-024-01378-4, PMID 39289545).",
+        "url": "https://www.rcsb.org/structure/8PJ1"
+      }
+    },
+    {
+      "name": "riboseq_footprint_80S_yeast",
+      "value": 28,
+      "unit": "nt",
+      "label": "Elongating 80S ribosome footprint in ribosome profiling (budding yeast)",
+      "note": "The original ribosome-profiling footprint length. The same paper reports footprint 5' ends starting 12-13 nt upstream of the start codon.",
+      "evidence": "\"75% of the 28-nt oligomer ribosome-protected fragments started on the first nucleotide of a codon\"; figure legend \"Position of 28-nt ribosome footprints relative to the reading frame.\"",
+      "source": {
+        "citation": "Ingolia NT, Ghaemmaghami S, Newman JRS, Weissman JS. Genome-wide analysis in vivo of translation with nucleotide resolution using ribosome profiling. Science 324:218-223 (2009). doi:10.1126/science.1168978, PMID 19213877.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2746483/"
+      }
+    },
+    {
+      "name": "riboseq_footprint_80S_human",
+      "value": [
+        28,
+        29
+      ],
+      "unit": "nt",
+      "label": "Elongating 80S footprint, human, conventional Ribo-seq",
+      "note": "The same study reports a longer predominant human 80S footprint of ~32-36 nt by TCP-seq, and a minor ~21-25 nt class with an empty A site.",
+      "evidence": "\"The predominant human 80S FP type detected by TCP-seq is slightly longer (between ~32-36 nt ...) compared with the ~28/29-nt FP length typically seen with conventional Ribo-seq\"",
+      "source": {
+        "citation": "Wagner S, Herrmannova A, Hronova V, et al. Selective Translation Complex Profiling Reveals Staged Initiation and Co-translational Assembly of Initiation Factor Complexes. Mol Cell 79:546-560.e7 (2020). doi:10.1016/j.molcel.2020.06.004, PMID 32589964.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC7447980/"
+      }
+    },
+    {
+      "name": "toeprint_leading_edge_from_p_site",
+      "value": [
+        16,
+        18
+      ],
+      "unit": "nt",
+      "label": "40S leading (entry) edge, nt downstream of the first nucleotide of the P-site triplet",
+      "note": "Biochemical measure of how far the 40S extends downstream of the codon in the P site. Independently reproduced by this asset: in 8PJ1 the 3'-most modelled nucleotide is +16 nt from the mRNA residue nearest the tRNAi anticodon.",
+      "evidence": "\"Generally, ribosomal complexes yield toeprint signals at the leading edge of the 40S subunits at the position +16 to +18 nt downstream of the mRNA triplet in the P site.\"",
+      "source": {
+        "citation": "Pisareva VP, Pisarev AV. DHX29 reduces leaky scanning through an upstream AUG codon regardless of its nucleotide context. Nucleic Acids Res 44:4252-4265 (2016). doi:10.1093/nar/gkw240, PMID 27067542.",
+        "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4872109/"
+      }
+    },
+    {
+      "name": "mrna_pp_spacing_in_40S",
+      "value": 6.42,
+      "unit": "A",
+      "label": "Mean phosphate-phosphate spacing of mRNA threaded through the 40S",
+      "note": "MEASURED from the deposited coordinates: mean distance between consecutive P atoms over the 47 contiguous modelled mRNA nucleotides of PDB 8PJ1 (human 48S, open codon-scanning state). Slightly longer than the extended-ssRNA value above because the path is kinked at the channel.",
+      "source": {
+        "citation": "Measured from PDB 8PJ1 (Petrychenko V, Yi SH, Liedtke D, Peng BZ, Rodnina MV, Fischer N. Structural basis for translational control by the human 48S initiation complex. Nat Struct Mol Biol 32:62-72 (2025). doi:10.1038/s41594-024-01378-4, PMID 39289545).",
+        "url": "https://www.rcsb.org/structure/8PJ1"
+      }
+    },
+    {
+      "name": "mrna_nt_modelled_in_48S",
+      "value": 47,
+      "unit": "nt",
+      "label": "mRNA nucleotides modelled in the 48S cryo-EM map",
+      "note": "MEASURED: contiguous modelled mRNA nucleotides (author residues -28..+19, 0 skipped) in PDB 8PJ1. This is how much mRNA the cryo-EM map resolved, i.e. a lower bound on what the complex encloses, not a biochemical protection measurement.",
+      "source": {
+        "citation": "Measured from PDB 8PJ1 (Petrychenko et al., Nat Struct Mol Biol 32:62-72 (2025), doi:10.1038/s41594-024-01378-4, PMID 39289545).",
+        "url": "https://www.rcsb.org/structure/8PJ1"
+      }
+    }
+  ],
+  "omitted": [
+    {
+      "name": "a_form_rna_helix_diameter_vdw",
+      "reason": "The widely quoted ~23 A A-RNA diameter could not be traced to a source that was actually opened and read. Only the phosphate-to-phosphate value of 19.5 A is given above. Do not display 23 A."
+    }
+  ],
+  "consumer_note": "Order matters: app/src/struct3d.js resolves its six scale slots by regex over each entry name+label and takes the FIRST match, so the entry that should answer \"nt in the 40S mRNA channel\" is placed before any other entry whose name mentions a channel, and \"footprint\" appears only in the 80S Ribo-seq entries. Keep this order if you add constants."
+}

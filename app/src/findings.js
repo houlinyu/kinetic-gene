@@ -14,8 +14,8 @@ const uIdx = (iso, f) => new Set(iso.uorfs.map((u, i) => (f(u) ? i : -1)).filter
 
 export const FINDINGS = [
   {
-    id: 'bulk', title: 'Stress lowers translation of most mRNAs', cite: 'eIF2α-P general repression',
-    status: 'mechanism',
+    id: 'bulk', title: 'Stress lowers translation of most mRNAs', cite: 'palam2011',
+    status: 'mechanism', note: 'Threshold (median < 0.6) is assumed, not from the paper.',
     test(data, p) {
       const r = data.genes.flatMap(g => g.isoforms).map(i => out(i, stress(p)) / Math.max(out(i, calm(p)), 1e-12)).filter(Number.isFinite).sort((a, b) => a - b);
       const med = r[Math.floor(r.length / 2)];
@@ -51,7 +51,7 @@ export const FINDINGS = [
   },
   {
     id: 'chop_up', title: 'CHOP (DDIT3) output rises under stress', cite: 'palam2011', status: 'missing',
-    note: 'Needs ribosome stalling inside the CHOP uORF (not in the model). A failure here points at that mechanism.',
+    note: 'Palam 2011 attributes induction to ribosomes bypassing the CHOP uORF because of its poor start context; the model has that leaky-scanning route but still fails, so something about this leader is missing.',
     test(data, p) {
       const iso = find(data, 'DDIT3'); if (!iso) return null;
       const a = out(iso, calm(p)), b = out(iso, stress(p));

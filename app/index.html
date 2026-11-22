@@ -4,22 +4,42 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>UTR Race</title>
+    <title>Kinetic Gene — one physics from promoter to protein</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
   </head>
   <body>
+    <!-- two pages, split by biology. Real URLs (#/transcription, #/translation) so each can be
+         opened directly and shared; #/make and #/use still redirect here. -->
+    <nav id="tabs" role="tablist" aria-label="stage">
+      <a class="pagebtn" role="tab" href="#/transcription" data-page="transcription">
+        <b><span class="pnum">①</span> Transcription</b><span class="tl"> — Pol II + splicing</span>
+        <small>which isoforms exist, and in what proportion</small>
+      </a>
+      <a class="pagebtn" role="tab" href="#/translation" data-page="translation">
+        <b><span class="pnum">②</span> Translation</b><span class="tl"> — ribosome scanning</span>
+        <small>protein per mRNA, for each isoform's 5′ UTR</small>
+      </a>
+    </nav>
     <div id="panel">
-      <h1>UTR Race</h1>
-      <p class="sub">Two versions of one gene's start region race to make protein.</p>
+      <h1>Kinetic Gene</h1>
+      <p class="appline">one physics from promoter to protein</p>
+      <p class="sub"><b>② Translation — ribosome scanning.</b> The ribosome moves 5′→3′ along the leader and every start codon is a race against it:
+        two versions of one gene's start region race to make protein.</p>
       <label class="genepick">Gene <select id="gene"></select></label>
+      <div id="xlink"></div>
+      <div id="evBadge"></div>
+      <label class="allg"><input type="checkbox" id="allGenes"> show genes without isoform-level evidence</label>
       <div id="verdict"></div>
       <button id="stressBtn" type="button">⚡ Apply stress</button>
+      <div id="viewNote" style="display:none"></div>
       <div id="cards">
         <div class="lane-card" id="cardA"></div>
         <div class="lane-card" id="cardB"></div>
       </div>
       <div id="fates"></div>
+      <div id="why"></div>
+      <div id="mlegend"></div>
       <details id="more">
         <summary>Structure stats, legend &amp; sources</summary>
         <div id="stats"></div>
@@ -36,13 +56,44 @@
       <p class="fine" id="prov"></p>
     </div>
     <div id="side">
+      <div id="geneEv"></div>
       <div id="score"></div>
+      <div id="fit"></div>
       <div id="guiHost"></div>
     </div>
     <button id="sideToggle" type="button"></button>
+    <div id="viewToggle" role="group" aria-label="view"><button type="button" data-v="linear">Linear</button><button type="button" data-v="folded">Folded</button><button type="button" data-v="struct">3D structure</button><label class="allm" title="show weak uAUGs, near-cognate starts, G4, TOP…"><input type="checkbox" id="allMotifs"> all motifs</label></div>
+    <div id="modeToggle" role="group" aria-label="detail level"><button type="button" data-m="simple">Simple</button><button type="button" data-m="detail">Detail</button></div>
     <div id="stressPill">⚡ STRESS: eIF2·TC low</div>
     <div id="tip"></div>
-    <div id="hint">click orange uORF = mutate AUG · click blue arcs = melt hairpin · drag = orbit · space = pause · S = stress</div>
+    <div id="hint">click orange uORF = mutate AUG · click blue arcs = melt hairpin (hover first: only the rate-limiting one changes the number) · drag = orbit · space = pause · S = stress</div>
+
+    <!-- ================= tab 2: Make it — transcription & splicing ================= -->
+    <div id="splicePanel">
+      <p class="appline">Kinetic Gene · one physics from promoter to protein</p>
+      <h2>① Transcription <span class="mute">— Pol II + splicing</span></h2>
+      <p class="sub2">Where the two isoforms on the <b>② Translation</b> page come from: Pol II moves 5′→3′ along the gene and the spliceosome decides, while the transcript is still being made, which exons end up in the mRNA — a splice site is a race against the polymerase, as a start codon is a race against the ribosome. Output: which isoforms exist, and in what proportion.</p>
+      <label class="genepick">Gene <select id="sgene"></select></label>
+      <label class="allg sallg"><input type="checkbox" id="sAllGenes"> show genes whose predicted splicing contradicts the measured data</label>
+      <div id="sgeneWarn"></div>
+      <div id="sheadline"><div class="shl-load">loading…</div></div>
+      <button id="slowBtn" type="button">⏳ Slow Pol II</button>
+      <div id="sviewNote"></div>
+      <div id="sctrls"></div>
+      <div id="sbins"></div>
+      <div id="sevents"></div>
+      <details id="smore">
+        <summary>All parameters &amp; sources</summary>
+        <div id="sctrlsAll"></div>
+        <div id="ssources"></div>
+      </details>
+      <p class="fine" id="sprov"></p>
+    </div>
+    <div id="spliceStage"><svg id="ssvg" viewBox="0 0 1000 520" preserveAspectRatio="xMidYMid meet"></svg></div>
+    <div id="splice3d"></div>
+    <div id="spliceViewToggle" role="group" aria-label="splice view"><button type="button" data-sv="diagram">Gene diagram</button><button type="button" data-sv="struct3d">3D real scale</button></div>
+    <div id="slowPill">⏳ SLOW Pol II: 0.5 kb/min</div>
+    <div id="shint"></div>
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>

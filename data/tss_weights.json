@@ -1,0 +1,780 @@
+{
+ "generated": "2026-11-22T15:49:52-05:00",
+ "window_nt": 50,
+ "panel": [
+  "adipose tissue",
+  "adrenal gland",
+  "aorta",
+  "bladder",
+  "blood",
+  "brain",
+  "cerebellum",
+  "cervix",
+  "colon",
+  "corpus callosum",
+  "esophagus",
+  "frontal lobe",
+  "heart",
+  "insula",
+  "kidney",
+  "liver",
+  "lung",
+  "medulla oblongata",
+  "nucleus accumbens",
+  "occipital pole",
+  "ovary",
+  "paracentral gyrus",
+  "parietal lobe",
+  "placenta",
+  "pons",
+  "postcentral gyrus",
+  "prostate",
+  "retina",
+  "salivary gland",
+  "skeletal muscle",
+  "small intestine",
+  "smooth muscle",
+  "spleen",
+  "temporal lobe",
+  "testis",
+  "testis",
+  "thymus",
+  "thyroid",
+  "tonsil",
+  "trachea",
+  "uterus"
+ ],
+ "source": {
+  "key": "fantom5_cage",
+  "dataset": "FANTOM5 phase 1+2 robust CAGE peak set, tag counts, hg38 reprocessed release (hg38_fair+new_CAGE_peaks_phase1and2_counts.osc.txt.gz + hg38_fair+new_CAGE_peaks_phase1and2.bed.gz)",
+  "citation": "Lizio M, Harshbarger J, Shimoji H, et al. Gateways to the FANTOM5 promoter level mammalian expression atlas. Genome Biology 2015;16:22. Data: FANTOM Consortium & the RIKEN PMI and CLST (DGT). A promoter-level mammalian expression atlas. Nature 2014;507:462-470.",
+  "url": "https://fantom.gsc.riken.jp/5/data/",
+  "licence": "CC BY 4.0 - \"FANTOM5 and FANTOM6 data by RIKEN is licensed under a Creative Commons Attribution 4.0 International License\" (https://fantom.gsc.riken.jp/5/data/; the data-file index declares \"license\":\"http://creativecommons.org/licenses/by/4.0/\").",
+  "method": "CAGE (cap analysis of gene expression): 5'-cap tag counts at each robust CAGE peak, normalised to tags per million mapped reads with the library size given in the table's 01STAT:MAPPED row, then expressed as the peak's share of that gene's matched-peak signal."
+ },
+ "genes": [
+  {
+   "gene": "ATF4",
+   "strand": "+",
+   "locus": "22:39519695-39522690",
+   "n_tss": 5,
+   "n_matched": 4,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 39519695,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    },
+    {
+     "id": "T2",
+     "pos": 544,
+     "genomic": 39520239,
+     "weight": 0.000789,
+     "mean_tpm": 0.1922,
+     "n_peaks": 2,
+     "shared_with": 2,
+     "offset_nt": 6,
+     "share_min": 0.0,
+     "share_max": 0.0091,
+     "share_median": 0.0008
+    },
+    {
+     "id": "T3",
+     "pos": 564,
+     "genomic": 39520259,
+     "weight": 0.000789,
+     "mean_tpm": 0.1922,
+     "n_peaks": 2,
+     "shared_with": 2,
+     "offset_nt": 14,
+     "share_min": 0.0,
+     "share_max": 0.0091,
+     "share_median": 0.0008
+    },
+    {
+     "id": "T4",
+     "pos": 867,
+     "genomic": 39520562,
+     "weight": 0.998406,
+     "mean_tpm": 243.2346,
+     "n_peaks": 1,
+     "shared_with": null,
+     "offset_nt": 7,
+     "share_min": 0.9819,
+     "share_max": 1.0,
+     "share_median": 0.9985
+    },
+    {
+     "id": "T5",
+     "pos": 1184,
+     "genomic": 39520879,
+     "weight": 1.6e-05,
+     "mean_tpm": 0.004,
+     "n_peaks": 1,
+     "shared_with": null,
+     "offset_nt": 9,
+     "share_min": 0.0,
+     "share_max": 0.0003,
+     "share_median": 0.0
+    }
+   ]
+  },
+  {
+   "gene": "ATF5",
+   "strand": "+",
+   "locus": "19:49928702-49933935",
+   "n_tss": 6,
+   "n_matched": 3,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 49928702,
+     "weight": 0.011566,
+     "mean_tpm": 1.1806,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 29,
+     "share_min": 0.0,
+     "share_max": 0.2267,
+     "share_median": 0.0114
+    },
+    {
+     "id": "T2",
+     "pos": 174,
+     "genomic": 49928876,
+     "weight": 0.011946,
+     "mean_tpm": 1.2194,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 21,
+     "share_min": 0.0,
+     "share_max": 0.1887,
+     "share_median": 0.0241
+    },
+    {
+     "id": "T3",
+     "pos": 503,
+     "genomic": 49929205,
+     "weight": 0.976488,
+     "mean_tpm": 99.6764,
+     "n_peaks": 1,
+     "shared_with": null,
+     "offset_nt": 0,
+     "share_min": 0.7547,
+     "share_max": 1.0,
+     "share_median": 0.9606
+    },
+    {
+     "id": "T4",
+     "pos": 871,
+     "genomic": 49929573,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    },
+    {
+     "id": "T5",
+     "pos": 892,
+     "genomic": 49929594,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    },
+    {
+     "id": "T6",
+     "pos": 1465,
+     "genomic": 49930167,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    }
+   ]
+  },
+  {
+   "gene": "DDIT3",
+   "strand": "-",
+   "locus": "12:57516584-57523630",
+   "n_tss": 6,
+   "n_matched": 2,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 57523630,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    },
+    {
+     "id": "T2",
+     "pos": 1877,
+     "genomic": 57521753,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    },
+    {
+     "id": "T3",
+     "pos": 2852,
+     "genomic": 57520778,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    },
+    {
+     "id": "T4",
+     "pos": 3115,
+     "genomic": 57520515,
+     "weight": 0.5,
+     "mean_tpm": 15.2248,
+     "n_peaks": 1,
+     "shared_with": 2,
+     "offset_nt": 4,
+     "share_min": 0.5,
+     "share_max": 0.5,
+     "share_median": 0.5
+    },
+    {
+     "id": "T5",
+     "pos": 3116,
+     "genomic": 57520514,
+     "weight": 0.5,
+     "mean_tpm": 15.2248,
+     "n_peaks": 1,
+     "shared_with": 2,
+     "offset_nt": 3,
+     "share_min": 0.5,
+     "share_max": 0.5,
+     "share_median": 0.5
+    },
+    {
+     "id": "T6",
+     "pos": 5802,
+     "genomic": 57517828,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    }
+   ]
+  },
+  {
+   "gene": "PPP1R15A",
+   "strand": "+",
+   "locus": "19:48872212-48879061",
+   "n_tss": 4,
+   "n_matched": 1,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 48872212,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    },
+    {
+     "id": "T2",
+     "pos": 209,
+     "genomic": 48872421,
+     "weight": 1.0,
+     "mean_tpm": 89.7398,
+     "n_peaks": 1,
+     "shared_with": null,
+     "offset_nt": 0,
+     "share_min": 1.0,
+     "share_max": 1.0,
+     "share_median": 1.0
+    },
+    {
+     "id": "T3",
+     "pos": 665,
+     "genomic": 48872877,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    },
+    {
+     "id": "T4",
+     "pos": 855,
+     "genomic": 48873067,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    }
+   ]
+  },
+  {
+   "gene": "BACE1",
+   "strand": "-",
+   "locus": "11:117285232-117316291",
+   "n_tss": 6,
+   "n_matched": 5,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 117316291,
+     "weight": 0.460691,
+     "mean_tpm": 22.207,
+     "n_peaks": 2,
+     "shared_with": 2,
+     "offset_nt": 5,
+     "share_min": 0.42,
+     "share_max": 0.5,
+     "share_median": 0.5
+    },
+    {
+     "id": "T2",
+     "pos": 35,
+     "genomic": 117316256,
+     "weight": 0.460691,
+     "mean_tpm": 22.207,
+     "n_peaks": 2,
+     "shared_with": 2,
+     "offset_nt": 6,
+     "share_min": 0.42,
+     "share_max": 0.5,
+     "share_median": 0.5
+    },
+    {
+     "id": "T3",
+     "pos": 20655,
+     "genomic": 117295636,
+     "weight": 0.023754,
+     "mean_tpm": 1.145,
+     "n_peaks": 1,
+     "shared_with": 3,
+     "offset_nt": 63,
+     "share_min": 0.0,
+     "share_max": 0.0494,
+     "share_median": 0.0
+    },
+    {
+     "id": "T4",
+     "pos": 20677,
+     "genomic": 117295614,
+     "weight": 0.023754,
+     "mean_tpm": 1.145,
+     "n_peaks": 1,
+     "shared_with": 3,
+     "offset_nt": 41,
+     "share_min": 0.0,
+     "share_max": 0.0494,
+     "share_median": 0.0
+    },
+    {
+     "id": "T5",
+     "pos": 20718,
+     "genomic": 117295573,
+     "weight": 0.031111,
+     "mean_tpm": 1.4997,
+     "n_peaks": 2,
+     "shared_with": 3,
+     "offset_nt": 0,
+     "share_min": 0.0,
+     "share_max": 0.0612,
+     "share_median": 0.0
+    },
+    {
+     "id": "T6",
+     "pos": 20806,
+     "genomic": 117295485,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    }
+   ]
+  },
+  {
+   "gene": "MDM2",
+   "strand": "+",
+   "locus": "12:68808141-68845544",
+   "n_tss": 6,
+   "n_matched": 6,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 68808141,
+     "weight": 0.293933,
+     "mean_tpm": 16.0827,
+     "n_peaks": 1,
+     "shared_with": 3,
+     "offset_nt": 38,
+     "share_min": 0.1851,
+     "share_max": 0.3333,
+     "share_median": 0.3118
+    },
+    {
+     "id": "T2",
+     "pos": 36,
+     "genomic": 68808177,
+     "weight": 0.293933,
+     "mean_tpm": 16.0827,
+     "n_peaks": 1,
+     "shared_with": 3,
+     "offset_nt": 2,
+     "share_min": 0.1851,
+     "share_max": 0.3333,
+     "share_median": 0.3118
+    },
+    {
+     "id": "T3",
+     "pos": 50,
+     "genomic": 68808191,
+     "weight": 0.293933,
+     "mean_tpm": 16.0827,
+     "n_peaks": 1,
+     "shared_with": 3,
+     "offset_nt": 12,
+     "share_min": 0.1851,
+     "share_max": 0.3333,
+     "share_median": 0.3118
+    },
+    {
+     "id": "T4",
+     "pos": 861,
+     "genomic": 68809002,
+     "weight": 0.0394,
+     "mean_tpm": 2.1558,
+     "n_peaks": 1,
+     "shared_with": 3,
+     "offset_nt": 22,
+     "share_min": 0.0,
+     "share_max": 0.1483,
+     "share_median": 0.0216
+    },
+    {
+     "id": "T5",
+     "pos": 876,
+     "genomic": 68809017,
+     "weight": 0.0394,
+     "mean_tpm": 2.1558,
+     "n_peaks": 1,
+     "shared_with": 3,
+     "offset_nt": 7,
+     "share_min": 0.0,
+     "share_max": 0.1483,
+     "share_median": 0.0216
+    },
+    {
+     "id": "T6",
+     "pos": 883,
+     "genomic": 68809024,
+     "weight": 0.0394,
+     "mean_tpm": 2.1558,
+     "n_peaks": 1,
+     "shared_with": 3,
+     "offset_nt": 0,
+     "share_min": 0.0,
+     "share_max": 0.1483,
+     "share_median": 0.0216
+    }
+   ]
+  },
+  {
+   "gene": "ERBB2",
+   "strand": "+",
+   "locus": "17:39687914-39728714",
+   "n_tss": 6,
+   "n_matched": 3,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 39687914,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    },
+    {
+     "id": "T2",
+     "pos": 187,
+     "genomic": 39688101,
+     "weight": 0.06281,
+     "mean_tpm": 1.8188,
+     "n_peaks": 1,
+     "shared_with": 2,
+     "offset_nt": 7,
+     "share_min": 0.0177,
+     "share_max": 0.3469,
+     "share_median": 0.0774
+    },
+    {
+     "id": "T3",
+     "pos": 205,
+     "genomic": 39688119,
+     "weight": 0.06281,
+     "mean_tpm": 1.8188,
+     "n_peaks": 1,
+     "shared_with": 2,
+     "offset_nt": 25,
+     "share_min": 0.0177,
+     "share_max": 0.3469,
+     "share_median": 0.0774
+    },
+    {
+     "id": "T4",
+     "pos": 11826,
+     "genomic": 39699740,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    },
+    {
+     "id": "T5",
+     "pos": 12150,
+     "genomic": 39700064,
+     "weight": 0.87438,
+     "mean_tpm": 25.3203,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 0,
+     "share_min": 0.3061,
+     "share_max": 0.9646,
+     "share_median": 0.8452
+    },
+    {
+     "id": "T6",
+     "pos": 15280,
+     "genomic": 39703194,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    }
+   ]
+  },
+  {
+   "gene": "ESR1",
+   "strand": "+",
+   "locus": "6:151651284-152129619",
+   "n_tss": 6,
+   "n_matched": 5,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 151651284,
+     "weight": 0.001953,
+     "mean_tpm": 0.0218,
+     "n_peaks": 1,
+     "shared_with": null,
+     "offset_nt": 1,
+     "share_min": 0.0,
+     "share_max": 0.5,
+     "share_median": 0.0
+    },
+    {
+     "id": "T2",
+     "pos": 39212,
+     "genomic": 151690496,
+     "weight": 0.267328,
+     "mean_tpm": 2.9853,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 3,
+     "share_min": 0.0956,
+     "share_max": 1.0,
+     "share_median": 0.8
+    },
+    {
+     "id": "T3",
+     "pos": 153147,
+     "genomic": 151804431,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the + strand in the panel"
+    },
+    {
+     "id": "T4",
+     "pos": 155912,
+     "genomic": 151807196,
+     "weight": 0.07106,
+     "mean_tpm": 0.7935,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 0,
+     "share_min": 0.0,
+     "share_max": 0.1667,
+     "share_median": 0.0
+    },
+    {
+     "id": "T5",
+     "pos": 156398,
+     "genomic": 151807682,
+     "weight": 0.632925,
+     "mean_tpm": 7.0679,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 0,
+     "share_min": 0.0,
+     "share_max": 0.7588,
+     "share_median": 0.1212
+    },
+    {
+     "id": "T6",
+     "pos": 157823,
+     "genomic": 151809107,
+     "weight": 0.026735,
+     "mean_tpm": 0.2985,
+     "n_peaks": 1,
+     "shared_with": null,
+     "offset_nt": 0,
+     "share_min": 0.0,
+     "share_max": 0.1111,
+     "share_median": 0.0
+    }
+   ]
+  },
+  {
+   "gene": "MAPT",
+   "strand": "+",
+   "locus": "17:45894278-46028334",
+   "n_tss": 1,
+   "n_matched": 1,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 45894278,
+     "weight": 1.0,
+     "mean_tpm": 0.7822,
+     "n_peaks": 1,
+     "shared_with": null,
+     "offset_nt": 30,
+     "share_min": 1.0,
+     "share_max": 1.0,
+     "share_median": 1.0
+    }
+   ]
+  },
+  {
+   "gene": "CDKN2A",
+   "strand": "-",
+   "locus": "9:21967752-21994392",
+   "n_tss": 2,
+   "n_matched": 2,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 21994392,
+     "weight": 0.890103,
+     "mean_tpm": 2.5629,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 4,
+     "share_min": 0.5,
+     "share_max": 1.0,
+     "share_median": 0.8617
+    },
+    {
+     "id": "T2",
+     "pos": 19535,
+     "genomic": 21974857,
+     "weight": 0.109897,
+     "mean_tpm": 0.3164,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 1,
+     "share_min": 0.0,
+     "share_max": 0.5,
+     "share_median": 0.1383
+    }
+   ]
+  },
+  {
+   "gene": "TP63",
+   "strand": "+",
+   "locus": "3:189631389-189897276",
+   "n_tss": 2,
+   "n_matched": 2,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 189631389,
+     "weight": 0.182731,
+     "mean_tpm": 1.4348,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 0,
+     "share_min": 0.0,
+     "share_max": 1.0,
+     "share_median": 0.7768
+    },
+    {
+     "id": "T2",
+     "pos": 158270,
+     "genomic": 189789659,
+     "weight": 0.817269,
+     "mean_tpm": 6.417,
+     "n_peaks": 2,
+     "shared_with": null,
+     "offset_nt": 1,
+     "share_min": 0.0,
+     "share_max": 1.0,
+     "share_median": 0.2232
+    }
+   ]
+  },
+  {
+   "gene": "TP53",
+   "strand": "-",
+   "locus": "17:7665963-7687490",
+   "n_tss": 7,
+   "n_matched": 2,
+   "tss": [
+    {
+     "id": "T1",
+     "pos": 0,
+     "genomic": 7687490,
+     "weight": 0.5,
+     "mean_tpm": 12.9724,
+     "n_peaks": 1,
+     "shared_with": 2,
+     "offset_nt": 3,
+     "share_min": 0.5,
+     "share_max": 0.5,
+     "share_median": 0.5
+    },
+    {
+     "id": "T2",
+     "pos": 3,
+     "genomic": 7687487,
+     "weight": 0.5,
+     "mean_tpm": 12.9724,
+     "n_peaks": 1,
+     "shared_with": 2,
+     "offset_nt": 0,
+     "share_min": 0.5,
+     "share_max": 0.5,
+     "share_median": 0.5
+    },
+    {
+     "id": "T3",
+     "pos": 1077,
+     "genomic": 7686413,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    },
+    {
+     "id": "T4",
+     "pos": 1330,
+     "genomic": 7686160,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    },
+    {
+     "id": "T5",
+     "pos": 9975,
+     "genomic": 7677515,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    },
+    {
+     "id": "T6",
+     "pos": 10713,
+     "genomic": 7676777,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    },
+    {
+     "id": "T7",
+     "pos": 11997,
+     "genomic": 7675493,
+     "weight": null,
+     "reason": "no CAGE peak within \u00b150 nt on the - strand in the panel"
+    }
+   ]
+  }
+ ]
+}

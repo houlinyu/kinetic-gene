@@ -7,15 +7,18 @@ Produces `data/utr_data.json` (contract: `data/SCHEMA.md`) and copies it to `app
 ```bash
 # env (one-time): ~/miniconda3/bin/conda create -y -n utrrace python=3.11
 #                 ~/miniconda3/envs/utrrace/bin/pip install ViennaRNA requests numpy h5py pandas
-cd ~/sundai-utr-race
+cd ~/kinetic-gene
 nice -n 19 ~/miniconda3/envs/utrrace/bin/python pipeline/build_data.py            # genes from pipeline/genes.txt
 nice -n 19 ~/miniconda3/envs/utrrace/bin/python pipeline/build_data.py ATF4 MYC   # genes from CLI
 #   --max-iso N    isoforms per gene (default 6)
 #   --no-cache     ignore pipeline/cache/ (cached Ensembl REST responses) and refetch
+#   --merge-only   reload data/utr_data.json, merge data/ridge.json (isoform.ridge, meta.ridge), write both copies
+nice -n 19 ~/miniconda3/envs/utrrace/bin/python pipeline/test_motifs.py          # motif unit tests
 ```
 To add genes, append symbols (one per line, `#` comments ok) to `pipeline/genes.txt`. Full 8-gene run: ~30 s
 uncached; folding a ~2.8 kb UTR takes ~5 s. The script prints a per-gene table and exits non-zero if a sanity
-check fails (layout2d / dotbracket length == len, uORF/hairpin positions in range, start codon at cds_context[6:9]).
+check fails (layout2d / dotbracket / punp length == len, pair span <= 100, uORF/hairpin/motif positions in range and
+motif seq matches, one kozak_main, motif cite in sources, start codon at cds_context[6:9]).
 
 ## What it does
 - **Transcripts**: Ensembl REST (GRCh38) `/lookup/symbol` -> `/overlap/id/<gene>?feature=transcript` (biotype + tags;
@@ -30,8 +33,15 @@ check fails (layout2d / dotbracket length == len, uORF/hairpin positions in rang
   the UTR; `overlapping` = stop past the main start, out of frame; `in-frame-extension` = in frame with the main start
   and no stop before it. If no stop exists in the cDNA, `end` = cDNA length and `aa` = null.
 - **Kozak**: rule in `main_kozak.method` (strong = -3 purine AND +4 G; adequate = one; weak = neither). `score` = null.
-- **Fold**: ViennaRNA MFE (default params, 37 C) of the full UTR; `cap_dG` = MFE of the first 50 nt;
-  `layout2d` = naview coordinates (`RNA.get_xy_coordinates`), centred and scaled to [-1, 1] (aspect preserved).
+- **Fold (v2, local)**: `punp` = RNAplfold unpaired probabilities (`RNA.pfl_fold_up`, W=150, L=100) on UTR + 30 nt
+  CDS; `acc_start` = mean punp over -15..+14 around the start. Structure (`dotbracket`, `layout2d`, `hairpins`) = MFE
+  with `max_bp_span=100` (an MEA from a span-limited partition function took ~55 s for 2.8 kb, so the span-limited MFE
+  is used). `mfe`/`mfe_global` = unrestricted global MFE (kept); `mfe_local` = MFE of the local structure; `cap_dG` =
+  MFE of the first 50 nt; `layout2d` = naview coordinates, centred and scaled to [-1, 1]. Full build ~60 s.
+- **Motifs** (`pipeline/motifs.py`): `find_motifs(utr, cds_head)` -> `isoform.motifs`; `features(...)` = flat numeric
+  features for the ridge agent (`FEATURES` = name -> label; `SOURCES` = cite keys, merged into `meta.sources`). Types
+  and sources in `data/SCHEMA.md`; tests in `pipeline/test_motifs.py`.
+- **Ridge**: if `data/ridge.json` exists its `per_isoform` entries become `isoform.ridge` and the rest `meta.ridge`.
 - **Hairpins**: from each hairpin-closing pair, extend outward through stacks/bulges/interior loops until a multiloop
   or exterior-loop branch; keep stems with >= 3 bp; `dG` = `eval_structure` of that substring + substructure.
 - **Blurbs / findings**: `pipeline/gene_notes.json` (blurbs written from the cited abstracts; sources merged into

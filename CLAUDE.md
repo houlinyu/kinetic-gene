@@ -1,6 +1,9 @@
-# UTR Race — Sundai Hack 150 (3D worlds), 2026-11-22
+# Kinetic Gene (formerly "UTR Race") — Sundai Hack 150 (3D worlds), 2026-11-22
 
-Three.js app comparing alternative 5' UTR isoforms: a ribosome-scanning sim run on real UTRs (folded with ViennaRNA), side by side.
+One physics from promoter to protein. Two pages:
+- **Transcription** - Pol II elongation + co-transcriptional splicing -> which isoforms exist.
+- **Translation** - ribosome scanning of each real 5' UTR (ViennaRNA-folded) -> protein per mRNA.
+Therapeutic levers appear on both pages, split by where the drug acts.
 
 - `pipeline/` Python precompute (env `utrrace`) -> `data/utr_data.json` -> copied to `app/public/utr_data.json`. Contract: `data/SCHEMA.md`.
 - `app/` Vite vanilla + three. Node lives in `~/miniconda3/envs/web/bin` (add to PATH). `npm run dev` / `npm run build`.

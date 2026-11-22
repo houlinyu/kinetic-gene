@@ -1,0 +1,355 @@
+{
+ "meta": {
+  "generated": "2026-11-22",
+  "method": "Evidence curator audit. Fetched PubMed abstracts (NCBI efetch) for every cited paper and for new candidate papers found by PubMed title search; fetched PMC full-text HTML where open (PMC509193 Vattem 2004, PMC3064149 Palam 2011, PMC4764583 Floor 2016 via efetch XML, PMC2652341, PMC1888809, PMC1447409, PMC1299076, PMC109205, PMC1456917, PMC363665, PMC11446271). Quotes are verbatim (<=15 words) from the text actually fetched; quote_source says abstract or full text. Cell lines marked 'full text' were read from the article; 'most-mentioned line' means identified by counting mentions, not by reading the specific assay. Anything not read is 'unverified'. Tier A = direct experiment on that gene's 5' leader with uORF or leader-isoform resolution; B = experiment on the leader but not resolving the isoforms/uORFs the app compares (incl. IRES-only studies) or genome-wide data only (Cao 2021 TE); C = none found. show_as_example = whether the app's isoform-level presentation for that gene is backed by the paper with a verified transcript mapping; false means show gene-level text at most. No data in utr_data.json was edited.",
+  "tiers": "A: direct leader experiment with uORF/isoform resolution; B: leader tested without the resolution the app needs, or genome-wide only; C: none"
+ },
+ "genes": {
+  "ATF4": {
+   "tier": "A",
+   "assays": [
+    "luciferase reporter (ATF4 leader-Luc) with uORF start-codon mutations",
+    "polysome/mRNA controls"
+   ],
+   "cells": "mouse embryonic fibroblasts, eIF2alpha S/S vs A/A (full text)",
+   "quote": "when uORF2 was mutated there was a ≈35-fold increase in ATF4-Luc",
+   "quote_source": "full text (Results, Fig. 4A)",
+   "cite": "vattem2004",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC509193/",
+   "isoform_resolved": true,
+   "show_as_example": true,
+   "caveat": "Paper tested the MOUSE ATF4 leader; human ATF4-206 (MANE) has the same uORF1 (3 aa) / uORF2 (59 aa, overlapping CDS) layout the paper describes for human and mouse, plus an extra 1-codon uORF at nt 24 the paper does not discuss. Only the MANE leader corresponds to the tested leader; the other 5 ATF4 isoforms have no experimental data (ATF4-201 has a Cao TE value but it is flagged ambiguous)."
+  },
+  "ATF5": {
+   "tier": "A",
+   "assays": [
+    "luciferase reporter with alternative 5'-UTRs",
+    "uAUG2 mutation",
+    "eIF2alpha phosphorylation dependence"
+   ],
+   "cells": "unverified (not in abstract; full text not fetched)",
+   "quote": "Mutation of uAUG2 in the uORF2 of 5'-UTRalpha restored the basal expression",
+   "quote_source": "abstract",
+   "cite": "watatani2008",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/18055463/",
+   "isoform_resolved": true,
+   "show_as_example": true,
+   "caveat": "Ensembl isoforms not mapped to 5'-UTRalpha / 5'-UTRbeta (exon1alpha/exon1beta) - ATF5-201 has a uORF1(3 aa)+overlapping uORF2 layout consistent with 5'-UTRalpha but this was not verified against the paper's sequence. Show gene-level only; no isoform-pair claim. Species of the tested leaders not stated in abstract (unverified)."
+  },
+  "DDIT3": {
+   "tier": "A",
+   "assays": [
+    "luciferase reporter (CHOP leader-Luc) with uORF ATG1/ATG2 mutations, Kozak substitution, uORF truncation",
+    "polysome profiling",
+    "immunoblot"
+   ],
+   "cells": "mouse embryonic fibroblasts (MEF) (full text)",
+   "quote": "eIF2 phosphorylation induces preferential translation of CHOP by a mechanism involving a single upstream ORF",
+   "quote_source": "abstract",
+   "cite": "palam2011",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3064149/",
+   "isoform_resolved": true,
+   "show_as_example": true,
+   "caveat": "Paper used the mouse CHOP leader (TSS mapped by 5'-RACE in MEF). Its single 34-aa uORF has two in-frame AUGs (AUG1, AUG2); the app lists these as two uORFs (34 aa and 31 aa) in DDIT3-201 - that is one uORF with two starts. DDIT3-201 also has a 73-aa ORF overlapping the CDS that the paper does not describe. Other DDIT3 isoforms: no experimental data."
+  },
+  "PPP1R15A": {
+   "tier": "A",
+   "assays": [
+    "5'UTR reporter constructs with uORF analysis",
+    "polysome association"
+   ],
+   "cells": "HepG2 (most-mentioned line in full text PMC2652341; specific assay-cell pairing not checked)",
+   "quote": "the downstream uORF mediates repression of basal translation and directs translation during eIF2alpha phosphorylation",
+   "quote_source": "abstract",
+   "cite": "lee2009",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2652341/",
+   "isoform_resolved": true,
+   "show_as_example": true,
+   "caveat": "NEW source (not yet in meta.sources / gene blurb is empty). Human GADD34 5'UTR has two non-overlapping uORFs, matching PPP1R15A-201 (22 aa and 26 aa uORFs). Other isoforms (-205, -208 with overlapping ORFs) have no experimental data."
+  },
+  "BACE1": {
+   "tier": "A",
+   "assays": [
+    "RNA transfection",
+    "in vitro translation",
+    "uAUG mutagenesis (Mihailovich 2007)",
+    "uAUG deletion/mutation reporters (Zhou & Song 2006)",
+    "5'UTR +/- constructs, protein and mRNA levels (Lammich 2004)"
+   ],
+   "cells": "HeLa (Mihailovich, full text); HEK293, N2a (Zhou & Song, full text); HEK293, COS7, H4 (Lammich, abstract)",
+   "quote": "mutations of all four uAUGs fully de-repress translation",
+   "quote_source": "abstract",
+   "cite": "mihailovich2007",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1888809/",
+   "isoform_resolved": true,
+   "show_as_example": true,
+   "caveat": "NEW sources. Evidence is uAUG-resolved on the full-length leader, NOT on alternative leaders. Mihailovich 2007: 'in brain and pancreas, almost all of the native BACE1 mRNA contains the full-length 5' UTR' - so the short Ensembl leaders (BACE1-206 26 nt, -202 89 nt, -207 67 nt) should not be presented as naturally competing isoforms. Papers disagree on uAUG count/which is key (four uAUGs, second most inhibitory - Mihailovich; six uAUGs, fourth inhibitory - Zhou & Song)."
+  },
+  "MYC": {
+   "tier": "B",
+   "assays": [
+    "in vitro translation (rabbit reticulocyte lysate)",
+    "bicistronic reporter transfection"
+   ],
+   "cells": "COS-7 (abstract)",
+   "quote": "An IRES was identified, requiring elements located within the P2 leader",
+   "quote_source": "abstract",
+   "cite": "nanbru1997",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/9405401/",
+   "isoform_resolved": false,
+   "show_as_example": false,
+   "caveat": "NEW source. Mechanism is IRES/cap-independent, which the scanning model does not have. MANE MYC-206 main start is a CUG (context UAGACG CUG G = c-Myc1), while the other 5 isoforms are annotated at AUG starts (c-Myc2) - so isoform comparisons mix different protein N-termini and a non-AUG start the AUG-based Kozak parameters do not cover. Ensembl leaders not mapped to P0/P1/P2. No Cao 2021 TE values. Do not use as an example."
+  },
+  "VEGFA": {
+   "tier": "B",
+   "assays": [
+    "in vitro translation",
+    "bicistronic reporters",
+    "site-directed mutagenesis",
+    "UV cross-linking"
+   ],
+   "cells": "COS-7 (most-mentioned line in full text PMC109205)",
+   "quote": "two independent internal ribosome entry sites (IRESs) are present in this 5' UTR",
+   "quote_source": "abstract",
+   "cite": "huez1998",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC109205/",
+   "isoform_resolved": false,
+   "show_as_example": false,
+   "caveat": "NEW source. IRES mechanism, outside the model. MANE VEGFA-226 is annotated at a CUG start (GUCGCG CUG A); VEGFA-201/-206 start at AUG -> different protein N-termini, not same-protein leader comparisons. VEGFA-206 (1036 nt) is close to the paper's 1,038-nt UTR but not verified identical. Cao TE values exist for -201/-206 only (gene-level, B)."
+  },
+  "TP53": {
+   "tier": "B",
+   "assays": [
+    "bicistronic IRES reporters",
+    "in vitro translation"
+   ],
+   "cells": "HeLa, H1299 (full text PMC1456917)",
+   "quote": "two internal ribosome entry sites (IRESs) mediate the translation of both full-length and DeltaN-p53 isoforms",
+   "quote_source": "abstract",
+   "cite": "ray2006",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1456917/",
+   "isoform_resolved": false,
+   "show_as_example": false,
+   "caveat": "NEW source. Evidence concerns IRESs for full-length vs DeltaN-p53 from one mRNA, not alternative 5' leaders. TP53-221/-228 use a different annotated start codon (different protein). Only TP53-201 has Cao TE, flagged ambiguous. Do not use as a leader-isoform example."
+  },
+  "MDM2": {
+   "tier": "A",
+   "assays": [
+    "polysome loading of endogenous L-/S-mdm2 mRNA",
+    "reporter gene fused to each 5' leader",
+    "uORF mutation"
+   ],
+   "cells": "tumor cells (abstract); specific lines unverified",
+   "quote": "this mRNA was loaded with ribosomes inefficiently in comparison with S-mdm2",
+   "quote_source": "abstract",
+   "cite": "brown1999",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/10523842/",
+   "isoform_resolved": true,
+   "show_as_example": true,
+   "caveat": "MANE MDM2-202 is annotated at a different start codon (exon-1 AUG, CCCCGG AUG G) than the P2 transcripts (AGGCAA AUG U) -> not a same-protein comparator for S-mdm2; use the mdm2_p2 pair (224 vs 209) only. MDM2-209 leader ends ...CCCCGGAUGGUGAGG..., i.e. it reads through the exon-1 AUG + what looks like the splice donor, so it is an approximation of the spliced L-mdm2 leader (its two 14-aa uORFs match 'two uORFs'); exact identity unverified. Landers 1997 (abstract) independently reports the P2-promoter transcripts have 'significantly enhanced translational efficiency'."
+  },
+  "BRCA1": {
+   "tier": "A",
+   "assays": [
+    "translation efficiency of 5'-UTRa vs 5'-UTRb transcripts",
+    "chemical/enzymatic structure probing",
+    "leader mutagenesis"
+   ],
+   "cells": "unverified (not in abstract; full text not retrieved)",
+   "quote": "translation efficiency of transcripts containing 5'-UTRb is 10 times lower than those containing 5'-UTRa",
+   "quote_source": "abstract",
+   "cite": "sobczak2002",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/11877386/",
+   "isoform_resolved": true,
+   "show_as_example": false,
+   "caveat": "Literature is isoform-resolved, but 5'-UTRa/5'-UTRb are NOT mapped to Ensembl transcripts (no coordinates/sequence in abstract; truncated-Alu-containing isoform not identified). Show the blurb gene-level only; do not present any BRCA1 isoform pair as the paper's comparison."
+  },
+  "ERBB2": {
+   "tier": "A",
+   "assays": [
+    "polysome sedimentation of endogenous mRNA",
+    "transient transfection reporter",
+    "uORF start-codon mutation",
+    "S1 protection / sequencing of leader"
+   ],
+   "cells": "primary human fibroblasts, human mammary epithelial cells, BT474, MCF-7, COS-7 (abstract)",
+   "quote": "HER-2 transcript leader repressed downstream translation approximately five-fold in both primary and transformed cells",
+   "quote_source": "abstract",
+   "cite": "child1999",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/10216954/",
+   "isoform_resolved": false,
+   "show_as_example": true,
+   "caveat": "Paper found ONE leader (no difference between cell types) with one short uORF; matches ERBB2-201 (single 6-aa uORF). The long alternative leaders (ERBB2-214/-217/-203 with 18-23 uORFs) have no dedicated experimental data; only Cao TE (gene-level, -217/-203 ambiguous)."
+  },
+  "ESR1": {
+   "tier": "A",
+   "assays": [
+    "reporter assays of human and mouse ER-alpha 5'-UTR variants",
+    "uAUG mutagenesis",
+    "toeprinting"
+   ],
+   "cells": "unverified (not in abstract)",
+   "quote": "Some of the 5'-UTRs were found to strongly inhibit translation",
+   "quote_source": "abstract",
+   "cite": "kos2002",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/12147702/",
+   "isoform_resolved": true,
+   "show_as_example": true,
+   "caveat": "Ensembl ESR1 isoforms not mapped to the paper's promoter-specific 5'-UTR variants; abstract does not say which leaders inhibit most. Gene-level example only; no isoform-pair direction. No Cao 2021 TE values for ESR1."
+  },
+  "RICTOR": {
+   "tier": "A",
+   "assays": [
+    "TrIP-seq (polysome fractionation + isoform RNA-seq)",
+    "Renilla luciferase reporter mRNA transfection"
+   ],
+   "cells": "HEK 293T (full text)",
+   "quote": "differ by only nine nucleotides, yet still exhibit differential protein production",
+   "quote_source": "abstract",
+   "cite": "floor2016",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4764583/",
+   "isoform_resolved": true,
+   "show_as_example": false,
+   "caveat": "The paper's two leaders differ by 9 nt; Ensembl RICTOR-202 (22 nt) vs -209 (167 nt) do not correspond. Paper attributes it 'possibly' to cap-proximal structure (RNAfold prediction, not measured). Do not show RICTOR isoforms as the paper's pair. Cao TE values exist (PC3: 5.25 vs 21.9, HEK293T 1.25 vs 0.88 - cell types disagree in direction)."
+  },
+  "SRSF5": {
+   "tier": "A",
+   "assays": [
+    "TrIP-seq",
+    "qRT-PCR of polysome fractions",
+    "Renilla luciferase reporter"
+   ],
+   "cells": "HEK 293T (full text)",
+   "quote": "Both 5′ leaders from SRSF5 contain two uORFs",
+   "quote_source": "abstract",
+   "cite": "floor2016",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4764583/",
+   "isoform_resolved": true,
+   "show_as_example": false,
+   "caveat": "Paper names SRSF5-002/-005 (old Havana names), not mapped to current ENST ids; text does not state which leader is translated better. Cao TE for -217 and -203 are identical (ambiguous, reads not resolved). Gene-level mention only."
+  },
+  "CCNE2": {
+   "tier": "B",
+   "assays": [
+    "TrIP-seq",
+    "luciferase reporter with paired 5'+3' UTRs"
+   ],
+   "cells": "HEK 293T (full text)",
+   "quote": "The two tested CCNE2 isoforms differ in both the 5′ and 3′ UTRs",
+   "quote_source": "abstract",
+   "cite": "floor2016",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC4764583/",
+   "isoform_resolved": false,
+   "show_as_example": false,
+   "caveat": "Not 5'-leader-resolved (5' and 3' UTRs changed together; authors only say control is 'possible' via the 5' UTR). Cao TE for -201/-205 identical (ambiguous). Do not present as a 5' leader example."
+  }
+ },
+ "findings": {
+  "bulk": {
+   "supported": true,
+   "quote": "Thapsigargin treatment of MEF cells significantly reduced polysome levels",
+   "figure": "Palam 2011 Fig. 2 (full text)",
+   "cite": "palam2011",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3064149/",
+   "note": "Direction supported (global polysome reduction under eIF2-P; abstract: 'phosphorylation of eIF2 rapidly reduces protein synthesis'). BUT findings.js cite field is 'eIF2α-P general repression', which is not a source key -> should be 'palam2011'. The pass threshold (median stress/calm < 0.6 over our isoforms) is not a number from any paper; label it as an assumed threshold."
+  },
+  "atf4_up": {
+   "supported": true,
+   "quote": "expression of the ATF4-luciferase was increased 6-fold in MEF cells",
+   "figure": "Vattem & Wek 2004 Fig. 2 (thapsigargin, eIF2alpha S/S MEF)",
+   "cite": "vattem2004",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC509193/",
+   "note": "Mouse ATF4 leader. Induction absent in eIF2alpha S51A (A/A) cells. App threshold (>1.5x) is weaker than the reported 6-fold; fine as a direction check."
+  },
+  "atf4_u1": {
+   "supported": true,
+   "quote": "Mutation of uORF1 resulted in a severe reduction in ATF4-Luc expression",
+   "figure": "Vattem & Wek 2004 Fig. 4A",
+   "cite": "vattem2004",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC509193/",
+   "note": "Paper: reduction 'independent of stress', comparable to A/A cells -> loss of induction, as tested. The test disables uORFs with 1<aa<=5, which in ATF4-206 is the 3-aa uORF1 only (the extra 1-codon uORF at nt 24 is untouched)."
+  },
+  "atf4_u2": {
+   "supported": true,
+   "quote": "when uORF2 was mutated there was a ≈35-fold increase in ATF4-Luc",
+   "figure": "Vattem & Wek 2004 Fig. 4A",
+   "cite": "vattem2004",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC509193/",
+   "note": "Compared with nonstressed WT; test requires >3x basal, consistent."
+  },
+  "chop_up": {
+   "supported": true,
+   "quote": "CHOP-Luc expression was increased by 3-fold in the wild-type MEF cells",
+   "figure": "Palam 2011 Fig. 3C (reporter); Fig. 2 polysome shift 25% -> 52% in large polysomes",
+   "cite": "palam2011",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC3064149/",
+   "note": "Direction supported. But the app's 'missing mechanism' note and params.js SOURCES.palam2011 text ('CHOP uORF elongation stall controls stress induction') misstate the paper: the paper's central mechanism for INDUCTION is bypass of the uORF 'due to its poor start site context' under eIF2-P (leaky scanning, Fig. 6). The elongation/termination block is 'suggested' to explain why the uORF is inhibitory (Fig. 7), not the induction. Reword: induction = leaky-scanning bypass of a poor-context uORF; uORF inhibition possibly via a translation elongation/termination block."
+  },
+  "mdm2_p2": {
+   "supported": true,
+   "quote": "this mRNA was loaded with ribosomes inefficiently in comparison with S-mdm2",
+   "figure": "unverified (abstract only; full text not retrieved)",
+   "cite": "brown1999",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/10523842/",
+   "note": "Direction (S-mdm2/P2 > L-mdm2/P1) supported by Brown 1999 and Landers 1997 abstracts. Mapping caveats: MDM2-224 (89 nt, P2 first exon) is a reasonable S-mdm2 match; MDM2-209 is an approximation of L-mdm2 (reads through the exon-1 AUG/splice donor; contains an upstream in-frame AUG the model treats as an in-frame extension). Endogenous Cao 2021 TE does not clearly reproduce it (HEK293T 0.60 vs 0.56 with 209 flagged ambiguous; PC3 1.46 vs 1.75, opposite)."
+  }
+ },
+ "new_sources": [
+  {
+   "key": "lee2009",
+   "citation": "Lee YY, Cevallos RC, Jan E. An upstream open reading frame regulates translation of GADD34 during cellular stresses that induce eIF2alpha phosphorylation. J Biol Chem 284:6661-73 (2009). PMID 19131336",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC2652341/"
+  },
+  {
+   "key": "mihailovich2007",
+   "citation": "Mihailovich M, Thermann R, Grohovaz F, Hentze MW, Zacchetti D. Complex translational regulation of BACE1 involves upstream AUGs and stimulatory elements within the 5' untranslated region. Nucleic Acids Res 35:2975-85 (2007). PMID 17439957",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1888809/"
+  },
+  {
+   "key": "zhou2006",
+   "citation": "Zhou W, Song W. Leaky scanning and reinitiation regulate BACE1 gene expression. Mol Cell Biol 26:3353-64 (2006). PMID 16611980",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1447409/"
+  },
+  {
+   "key": "lammich2004",
+   "citation": "Lammich S, Schobel S, Zimmer AK, Lichtenthaler SF, Haass C. Expression of the Alzheimer protease BACE1 is suppressed via its 5'-untranslated region. EMBO Rep 5:620-5 (2004). PMID 15167888",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1299076/"
+  },
+  {
+   "key": "nanbru1997",
+   "citation": "Nanbru C et al. Alternative translation of the proto-oncogene c-myc by an internal ribosome entry site. J Biol Chem 272:32061-6 (1997). PMID 9405401",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/9405401/"
+  },
+  {
+   "key": "huez1998",
+   "citation": "Huez I et al. Two independent internal ribosome entry sites are involved in translation initiation of vascular endothelial growth factor mRNA. Mol Cell Biol 18:6178-90 (1998). PMID 9774635",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC109205/"
+  },
+  {
+   "key": "ray2006",
+   "citation": "Ray PS, Grover R, Das S. Two internal ribosome entry sites mediate the translation of p53 isoforms. EMBO Rep 7:404-10 (2006). PMID 16440000",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC1456917/"
+  },
+  {
+   "key": "kozak1991",
+   "citation": "Kozak M. A short leader sequence impairs the fidelity of initiation by eukaryotic ribosomes. Gene Expr 1:111-5 (1991). PMID 1820208",
+   "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC5952205/",
+   "note": "Verifies params.js kozak1991 qualitatively: first-AUG yield decreased progressively as cap distance fell from 32 to 3 nt (in vitro). The app's capAUGnt=12 is not a number from this abstract -> keep labelled as a choice."
+  }
+ ],
+ "param_sources_check": {
+  "kozak1989": "verified (abstract on PMC363665): -30 kcal/mol hairpin 12 nt from cap blocked 40S engagement, no effect at 52 nt; -61 kcal/mol hp7 at 72 nt stalled 40S. Matches SOURCES text.",
+  "wang2022": "verified (PubMed abstract): yeast 43S scanning ~100 nt/s, single-molecule fluorescence. SOURCES says smFRET; abstract says 'real-time single-molecule fluorescence spectroscopy' (full text of PMC11446271 calls it a smFRET study) - OK.",
+  "scan10": "verified (full text PMC11446271): yeast scanning complexes 'scan diverse mRNA leaders at a rate of 10 to 20 nt s-1'.",
+  "kozak1991": "verified qualitatively (see new_sources); SOURCES text still says '(verify)' and url null -> can add url and drop 'verify'.",
+  "vattem2004": "verified (full text).",
+  "palam2011": "TEXT MISSTATES the paper - see findings.chop_up.note.",
+  "noderer2014": "unverified (not fetched)."
+ },
+ "other_flags": [
+  "Non-AUG main starts: MANE MYC-206 (CUG) and MANE VEGFA-226 (CUG). main_kozak and the sim's Kozak P(init) are AUG rules; do not show these as scanning examples.",
+  "Isoforms whose annotated start codon differs from the reference (tss_note features alt_start_codon) encode different N-termini - in MYC, VEGFA, TP53, MDM2 (MANE vs P2) - so the comparison is not 'same protein, different leader'.",
+  "Most non-reference isoforms of every gene have NO experimental data; their numbers in the app are model output (Optimus/ridge/sim) only. Only the gene-level leaders in the papers and the mdm2_p2 pair are experimentally backed.",
+  "Cao 2021 TE values with ambiguous=true are gene-level (identical across isoforms) and should not be shown as isoform differences."
+ ]
+}
