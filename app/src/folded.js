@@ -202,8 +202,16 @@ export class FoldView {
     const lane = this.lane; if (!lane) return;
     const m = new THREE.Matrix4(), c = new THREE.Color(), v = new THREE.Vector3(), q = new THREE.Quaternion(), s = new THREE.Vector3();
     let n = 0;
+    // Simple mode: cap how many ribosomes are DRAWN (view only; the model runs all of them).
+    // The stride only grows quickly and relaxes slowly, so beads do not flicker in and out.
+    const cap = this.maxDraw ?? Infinity, cnt = (this.lane?.ribos ?? []).length;
+    let stride = this._stride ?? 1;
+    if (cnt / stride > cap) stride *= 2; else if (stride > 1 && cnt / (stride / 2) <= cap * 0.7) stride /= 2;
+    if (!(cap < Infinity)) stride = 1;
+    this._stride = stride;
     for (const r of lane.ribos) {
       if (n >= MAX_RIBO) break;
+      if (stride > 1 && Math.floor(r.id * 1e6) % stride) continue;
       this.P(r.pos, v);
       if (r.mode === 'scan' && r.waitHp) v.x += Math.sin(performance.now() * 0.03 + r.id * 50) * this.nr * 0.6;
       v.z += this.nr * 1.2;

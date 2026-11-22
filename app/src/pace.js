@@ -16,10 +16,10 @@
 //     which both pages print as "held at the slowest/fastest watchable pace".
 
 export const PACE = {
-  MID: 6,                       // wall seconds one traversal should take at the DEFAULT settings
-  MIN: 2.5, MAX: 20,            // preferred window for one traversal (the user's 2-20 s target)
-  HARD_MIN: 1.5, HARD_MAX: 26,  // never outside this, whatever else asks
-  MAX_GAP: 12,                  // longest wall gap between two visible events before it looks dead
+  MID: 10,                      // wall seconds one traversal should take at the DEFAULT settings
+  MIN: 6.5, MAX: 22,            // preferred window for one traversal (slow enough to read)
+  HARD_MIN: 5, HARD_MAX: 25,    // never outside this, whatever else asks (speed is ORDINAL, not linear)
+  MAX_GAP: 18,                  // longest wall gap between two visible events before it looks dead
   GAMMA: 0.45,                  // share of the real slow<->fast ratio kept on screen
   LGAMMA: 0.18,                 // share of the real short<->long gene ratio kept on screen
   MAX_WPS: 1.2,                 // blur ceiling: lane widths per second for the FASTEST marker
@@ -49,7 +49,8 @@ export function solve({ nt, rate, refNt, refRate, gapSim = 0, mul = 1, fastRate 
   const ideal = crossSim / clamp(want, PACE.MIN, PACE.MAX);
   let ts = ideal * (mul > 0 ? mul : 1);
   const empty = gapSim > 0 && gapSim / ts > PACE.MAX_GAP;
-  if (empty) ts = Math.max(ts, gapSim / PACE.MAX_GAP);         // lane would be empty -> speed up
+  // lane would be empty -> speed up, but never past the fast edge of the readable window
+  if (empty) ts = Math.max(ts, Math.min(gapSim / PACE.MAX_GAP, crossSim / PACE.MIN));
   const lo = crossSim / PACE.HARD_MAX, hi = crossSim / PACE.HARD_MIN;
   let out = clamp(ts, lo, hi);
   // hard blur ceiling, highest priority: nothing on screen may cross more than MAX_WPS lane
@@ -58,6 +59,9 @@ export function solve({ nt, rate, refNt, refRate, gapSim = 0, mul = 1, fastRate 
   if (blur < out) out = blurSoft ? Math.sqrt(out * blur) : blur;
   // hard freeze floor, last word: the marker must still visibly move
   out = Math.max(out, PACE.MIN_STEP * crossSim / PACE.MIN_STEP_S);
+  // last word (2026-11-22, "fast is fast, slow is slow, but always readable"): one traversal is
+  // never shorter than HARD_MIN nor longer than HARD_MAX wall seconds, at any setting
+  out = clamp(out, lo, hi);
   return {
     ts: out,
     crossSim,

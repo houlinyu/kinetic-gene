@@ -24,7 +24,8 @@
     <div id="panel">
       <h1>Kinetic Gene</h1>
       <p class="appline">one physics from promoter to protein</p>
-      <p class="sub"><b>② Translation — ribosome scanning.</b> The ribosome moves 5′→3′ along the leader and every start codon is a race against it:
+      <p class="sub sub-simple">Two versions of one gene's start region race to make protein. Ribosomes run left to right.</p>
+      <p class="sub sub-detail"><b>② Translation — ribosome scanning.</b> The ribosome moves 5′→3′ along the leader and every start codon is a race against it:
         two versions of one gene's start region race to make protein.</p>
       <label class="genepick">Gene <select id="gene"></select></label>
       <div id="xlink"></div>
@@ -32,6 +33,9 @@
       <label class="allg"><input type="checkbox" id="allGenes"> show genes without isoform-level evidence</label>
       <div id="verdict"></div>
       <button id="stressBtn" type="button">⚡ Apply stress</button>
+      <p id="stressLine"></p>
+      <p class="kghon">model, not measurement · slowed for viewing — speeds are relative</p>
+      <button class="kgmore" type="button" data-kgmore>details ▸</button>
       <div id="viewNote" style="display:none"></div>
       <div id="cards">
         <div class="lane-card" id="cardA"></div>
@@ -72,12 +76,15 @@
     <div id="splicePanel">
       <p class="appline">Kinetic Gene · one physics from promoter to protein</p>
       <h2>① Transcription <span class="mute">— Pol II + splicing</span></h2>
-      <p class="sub2">Where the two isoforms on the <b>② Translation</b> page come from: Pol II moves 5′→3′ along the gene and the spliceosome decides, while the transcript is still being made, which exons end up in the mRNA — a splice site is a race against the polymerase, as a start codon is a race against the ribosome. Output: which isoforms exist, and in what proportion.</p>
+      <p class="sub2 sub-simple">Pol II copies the gene left to right; splicing decides which exons stay. Result: which versions (isoforms) get made.</p>
+      <p class="sub2 sub-detail">Where the two isoforms on the <b>② Translation</b> page come from: Pol II moves 5′→3′ along the gene and the spliceosome decides, while the transcript is still being made, which exons end up in the mRNA — a splice site is a race against the polymerase, as a start codon is a race against the ribosome. Output: which isoforms exist, and in what proportion.</p>
       <label class="genepick">Gene <select id="sgene"></select></label>
       <label class="allg sallg"><input type="checkbox" id="sAllGenes"> show genes whose predicted splicing contradicts the measured data</label>
       <div id="sgeneWarn"></div>
       <div id="sheadline"><div class="shl-load">loading…</div></div>
       <button id="slowBtn" type="button">⏳ Slow Pol II</button>
+      <p class="kghon">model, not measurement · slowed for viewing — speeds are relative</p>
+      <button class="kgmore" type="button" data-kgmore>details ▸</button>
       <div id="sviewNote"></div>
       <div id="sctrls"></div>
       <div id="sbins"></div>

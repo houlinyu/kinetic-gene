@@ -244,6 +244,7 @@ const el = (tag, attrs, parent) => {
 };
 const COL = { exon: '#e9e4d8', alt: '#ffb547', intron: '#6a7183', pol: '#5ee0a0', rna: '#e85d9c', don: '#4fc3f7', acc: '#c39bff' };
 const VIEW_W = 1000, VIEW_H = 520;
+const TAG_LIFE = 1.6;      // wall seconds an event tag stays readable
 const SUBSTEP = 0.5;       // model seconds per sub-step (the race needs a fine dt)
 
 // Genes whose predicted splicing contradicts the measured data shipped in this repo. They are off
@@ -831,8 +832,8 @@ export class SpliceTab {
       el('rect', { x, y: Y.bin, width: bw, height: 66, rx: 7, fill: 'rgba(233,228,216,.05)', stroke: 'rgba(233,228,216,.18)' }, gb);
       const fill = el('rect', { x: x + 1, y: Y.bin + 65, width: bw - 2, height: 0, rx: 6, fill: o.iso ? COL.rna : COL.intron, opacity: 0.32 }, gb);
       el('text', { x: x + 8, y: Y.bin + 17, class: 'binlab' }, gb).textContent = String(o.name).slice(0, 24);
-      const v = el('text', { x: x + 8, y: Y.bin + 48, class: 'binpct' }, gb);
-      const c = el('text', { x: x + bw - 8, y: Y.bin + 48, class: 'bincnt', 'text-anchor': 'end' }, gb);
+      const v = el('text', { x: x + 8, y: Y.bin + 58, class: 'binpct' }, gb);
+      const c = el('text', { x: x + bw - 8, y: Y.bin + 58, class: 'bincnt', 'text-anchor': 'end' }, gb);
       if (o.iso) {
         const set = new Set(o.iso.exon_ids ?? []);
         const kept = (g.exons ?? []).filter(e => set.has(e.id));
@@ -864,18 +865,58 @@ export class SpliceTab {
     if (this.evAt > ev.length) this.evAt = 0;
     for (; this.evAt < ev.length; this.evAt++) {
       const e = ev[this.evAt];
-      if (e.kind === 'spliced') this.anim.push({ kind: 'lariat', pol: e.pol, intron: e.intron, age: 0 });
+      if (e.kind === 'commit') this.addTag('splice site chosen', e.intron, '#ffb547');
+      if (e.kind === 'spliced') { this.anim.push({ kind: 'lariat', pol: e.pol, intron: e.intron, age: 0 }); this.addTag('intron removed', e.intron, '#c9d0de'); }
       // the finished transcript falls in the colour of the isoform it became (same key the tree
       // leaves use), so the drop, the leaf and the bin all agree
-      else if (e.kind === 'finished') this.drops.push({ key: e.isoform ?? 'other', age: 0, colour: e.isoform && e.isoform !== 'other' ? DIV.idColour(e.isoform) : COL.intron });
+      else if (e.kind === 'finished') this.addTag('transcript finished ↓', null, '#e85d9c');
+      if (e.kind === 'finished') this.drops.push({ key: e.isoform ?? 'other', age: 0, colour: e.isoform && e.isoform !== 'other' ? DIV.idColour(e.isoform) : COL.intron });
     }
     for (const a of this.anim) a.age += dt;
     this.anim = this.anim.filter(a => a.age < 1.5).slice(-12);
     for (const d of this.drops) d.age += dt;
-    this.drops = this.drops.filter(d => d.age < 1.1).slice(-20);
+    this.drops = this.drops.filter(d => d.age < 2.0).slice(-20);
+    for (const t of (this.tags ?? [])) t.age += dt;
+    this.tags = (this.tags ?? []).filter(t => t.age < TAG_LIFE);
     // per-transcript identity + the "same site, different choice" watch: done here, not in frame(),
     // so it also runs while the 3D view is on screen
     this.tickIdentity((typeof this.sim.view === 'function' ? this.sim.view() : this.sim.pols) ?? [], dt);
+  }
+  // Short plain-language event tags on the stage: at most 3 at once, each held TAG_LIFE seconds
+  // in its own row so they never overlap and can actually be read. View only.
+  addTag(txt, intron, colour) {
+    const m = this.map; if (!m) return;
+    const tags = this.tags ?? (this.tags = []);
+    if (tags.length >= 3 || tags.some(t => t.txt === txt && t.age < 0.7)) return;
+    const j = intron ? this.J.find(o => o.id === intron) : null;
+    const w = 7 * txt.length + 18;
+    const x = clamp(j ? (m(j.start) + m(j.end)) / 2 : m(m.s1) - w / 2, w / 2 + 4, VIEW_W - w / 2 - 4);
+    let slot = 0; while (tags.some(t => t.slot === slot)) slot++;
+    tags.push({ txt, x, w, slot, colour, age: 0 });
+  }
+  drawTags() {
+    const Y = this.Y;
+    for (const t of (this.tags ?? [])) {
+      const op = t.age < 0.15 ? t.age / 0.15 : t.age > TAG_LIFE - 0.4 ? (TAG_LIFE - t.age) / 0.4 : 1;
+      const y = Y.rna - 34 - t.slot * 24;
+      const g = el('g', { opacity: clamp(op, 0, 1).toFixed(2) }, this.gDrop);
+      el('rect', { x: (t.x - t.w / 2).toFixed(1), y: y - 14, width: t.w, height: 20, rx: 10, fill: t.colour }, g);
+      el('text', { x: t.x, y: y, 'text-anchor': 'middle', class: 'evtag' }, g).textContent = t.txt;
+    }
+  }
+  // display position: the x axis is log-compressed, so the model bead would DASH through the exons
+  // (ESR1: half the picture in 0.1 s). The drawn bead is speed-limited to one lane per PACE.HARD_MIN
+  // seconds and catches up inside the introns. View only: the model position is untouched.
+  dispOf(p, dt) {
+    const m = this.map;
+    if (this.dispMap !== m) { this.dispMap = m; this.disp = new Map(); }
+    const x = m(p.pos ?? 0), prev = this.disp.get(p.id)?.x;
+    const vmax = (m(m.s1) - m(m.s0)) / pace.PACE.HARD_MIN;
+    const xd = prev == null || x < prev ? x : Math.min(x, prev + vmax * dt);
+    this.disp.set(p.id, { x: xd, p, seen: this.t });
+    if (xd >= x - 0.5) return { x, pos: p.pos ?? 0 };
+    for (const sg of m.segs) if (xd <= sg.x1) return { x: xd, pos: sg.s + clamp((xd - sg.x0) / Math.max(1e-6, sg.px), 0, 1) * (sg.e - sg.s) };
+    return { x, pos: p.pos ?? 0 };
   }
   frame(dt) {
     const g = this.gene, m = this.map, Y = this.Y;
@@ -886,8 +927,30 @@ export class SpliceTab {
     // each nascent transcript's own emerging isoform (promoter + the choices it has made so far)
     const sigBy = new Map((this.sigs ?? []).map(s => [s.polId, s]));
     this.chipRow = {};
-    for (const p of pols.slice(0, 8)) {
-      const pos = p.pos ?? 0, x = m(pos);
+    // Simple mode draws a handful (moving ones first) so each can be followed; the model still
+    // runs all of them and every printed number comes from the exact model, not from the beads.
+    const simple = this.simple;
+    // The chosen ones are STICKY (followed until they finish) and a free slot goes to the released
+    // polymerase nearest the promoter, so a bead is seen from its start instead of popping in mid-gene.
+    const capN = simple ? 4 : 7, byPol = new Map(pols.map(q => [q.id, q]));
+    if (this.visFor !== m) { this.visFor = m; this.visIds = new Set(); }
+    for (const id of this.visIds) if (!byPol.has(id)) this.visIds.delete(id);
+    if (this.visIds.size < capN) {
+      const cand = pols.filter(q => !q.paused && !this.visIds.has(q.id)).sort((a, b) => (a.pos ?? 0) - (b.pos ?? 0));
+      for (const q of cand) { if (this.visIds.size >= capN) break; this.visIds.add(q.id); }
+    }
+    const vis = [...pols.filter(q => this.visIds.has(q.id)), ...pols.filter(q => q.paused).slice(0, 1)];
+    // a bead still catching up when its transcript finished glides on to the gene end
+    const live = new Set(pols.map(q => q.id)), xEnd = m(m.s1);
+    if (this.dispMap === m) for (const [id, d] of this.disp) {
+      if (live.has(id)) continue;
+      if (d.x < xEnd - 1 && vis.length < 9 && this.t - d.seen < 6) vis.push({ ...d.p, pos: m.s1, paused: false, _ghost: true });
+      else this.disp.delete(id);
+    }
+    this.nShown = vis.length; this.nTotal = pols.length; this.drawnIds = new Set(vis.map(q => q.id));
+    for (const p of vis) {
+      const dp = this.dispOf(p, dt);
+      const pos = dp.pos, x = dp.x;
       const rem = new Set(p.removed ?? []), com = new Set(p.committed ?? []), dead = new Set(p.skipped ?? []);
       // nascent RNA, 5' end anchored at the TSS
       const wig = (x0, x1, amp) => {
@@ -900,8 +963,8 @@ export class SpliceTab {
         return s;
       };
       let d = `M${m(p.tssPos ?? m.s0)} ${Y.rna}`, cur = p.tssPos ?? m.s0;
-      const live = this.J.filter(j => j.start < pos && !dead.has(j.id) && j.start >= (p.tssPos ?? 0)).sort(ntSort);
-      for (const j of live) {
+      const liveJ = this.J.filter(j => j.start < pos && !dead.has(j.id) && j.start >= (p.tssPos ?? 0)).sort(ntSort);
+      for (const j of liveJ) {
         if (j.start < cur) continue;
         const a = m(j.start), b = m(Math.min(j.end, pos));
         d += wig(m(cur), a, 2.4);
@@ -912,7 +975,7 @@ export class SpliceTab {
           if (com.has(j.id)) { // spliceosome committed to this intron: amber bead on the loop
             const c = el('circle', { cx: (a + b) / 2, cy: Y.rna + h * 0.78, r: 6, fill: COL.alt, opacity: .9, class: 'glow' }, this.gRNA);
             el('title', {}, c).textContent = `${j.id}: spliceosome committed, waiting to cut`;
-            if (b - a > 90) el('text', { x: (a + b) / 2, y: Y.rna + h * 0.78 + 17, class: 'slab alt', 'text-anchor': 'middle' }, this.gRNA).textContent = 'committed';
+            if (b - a > 90 && !simple) el('text', { x: (a + b) / 2, y: Y.rna + h * 0.78 + 17, class: 'slab alt', 'text-anchor': 'middle' }, this.gRNA).textContent = 'committed';
           }
         }
         cur = Math.min(j.end, pos);
@@ -929,7 +992,7 @@ export class SpliceTab {
         const xa = m(j.start), xb = m(j.end), cx = (xa + xb) / 2, k = a.age / 1.5;
         const r = clamp((xb - xa) / 5, 7, 24) * (1 - .45 * k);
         el('circle', { cx, cy: Y.rna + 64 + k * 74, r, fill: 'none', stroke: COL.intron, 'stroke-width': 2, opacity: (1 - k).toFixed(2), class: 'glow' }, this.gRNA);
-        el('text', { x: cx, y: Y.rna + 64 + k * 74 - r - 5, class: 'slab', 'text-anchor': 'middle', opacity: (1 - k).toFixed(2) }, this.gRNA).textContent = 'intron lariat';
+        if (!simple) el('text', { x: cx, y: Y.rna + 64 + k * 74 - r - 5, class: 'slab', 'text-anchor': 'middle', opacity: (1 - k).toFixed(2) }, this.gRNA).textContent = 'intron lariat';
       }
       // Pol II
       const gp = el('g', {}, this.gPol);
@@ -937,19 +1000,20 @@ export class SpliceTab {
       el('circle', { cx: x, cy: Y.dna, r: 11, fill: COL.pol, opacity: p.paused ? .5 : 1, class: p.paused ? '' : 'glow' }, gp);
       el('text', { x, y: Y.dna + 4, class: 'pollab', 'text-anchor': 'middle' }, gp).textContent = 'Pol';
       if (p.paused) el('text', { x, y: Y.dna - 50, class: 'slab warn2', 'text-anchor': 'middle' }, gp).textContent = 'paused';
-      if (p.postTx) el('text', { x, y: Y.rna + 4, class: 'slab warn2', 'text-anchor': 'start' }, gp).textContent = ' post-txn';
+      if (p.postTx && !simple) el('text', { x, y: Y.rna + 4, class: 'slab warn2', 'text-anchor': 'start' }, gp).textContent = ' post-txn';
       // the identity chip: this transcript's isoform as far as it has been decided ("?" = still racing)
-      if (sig) this.drawChip(x, sig);
+      if (sig && !simple) this.drawChip(x, sig);
     }
-    this.drawDivergence(m, Y);
+    if (!simple) this.drawDivergence(m, Y);
     // falling transcripts
     this.gDrop.innerHTML = '';
     for (const dr of this.drops) {
       const b = this.bins.get(dr.key) ?? this.bins.get('other'); if (!b) continue;
-      const k = clamp(dr.age / 1.0, 0, 1), xe = m(m.s1);
+      const k = clamp(dr.age / 1.9, 0, 1), xe = m(m.s1);
       const x = xe + (b.x + b.bw / 2 - xe) * k, y = Y.rna + (b.cy + 30 - Y.rna) * k * k;
-      el('rect', { x: x - 9, y: y - 3, width: 18, height: 6, rx: 3, fill: dr.colour ?? COL.rna, opacity: (1 - .3 * k).toFixed(2), class: 'glow' }, this.gDrop);
+      el('rect', { x: x - 13, y: y - 4, width: 26, height: 8, rx: 4, fill: dr.colour ?? COL.rna, opacity: (1 - .3 * k).toFixed(2), class: 'glow' }, this.gDrop);
     }
+    this.drawTags();
     // bins + arcs from the expected model
     const n = this.finished();
     const rows = new Map(this.isoRows(this.exp).map(r => [r.id, r.value]));
@@ -964,7 +1028,7 @@ export class SpliceTab {
       const u = use[id];
       a.path.setAttribute('stroke-width', (0.6 + 6 * clamp(u ?? 0, 0, 1)).toFixed(2));
       a.path.setAttribute('opacity', (0.25 + 0.7 * clamp(u ?? 0, 0, 1)).toFixed(2));
-      a.lab.textContent = Number.isFinite(u) ? pct(u) : '';
+      a.lab.textContent = Number.isFinite(u) && !this.simple ? pct(u) : '';
     }
   }
   // ---------- live isoform identity on the gene diagram ----------
@@ -1039,7 +1103,10 @@ export class SpliceTab {
     const gapSim = Math.max(init > 0 ? 1 / init : 0, (this.P.pauseProb ?? 0) > 0.02 && pe > 0 ? 1 / pe : 0);
     // the x axis is log-compressed, so the bead dashes through the exons and crawls through a long
     // intron: the blur ceiling has to be set by the FASTEST stretch, not by the average
-    return pace.solve({ nt, rate: r, mul, refNt: 20000, refRate: (ek ? this.P0?.[ek] : null) ?? r, gapSim, fastRate: r * burstOf(m), blurSoft: true });
+    // (2026-11-22) the dash through the exons is now handled where it is drawn — dispOf() speed-limits
+    // the bead — so the solver no longer has to slow the WHOLE gene down for it (that flattened
+    // slow<->fast to nothing on the long genes).
+    return pace.solve({ nt, rate: r, mul, refNt: 12000, refRate: (ek ? this.P0?.[ek] : null) ?? r, gapSim });
   }
   renderPace() {
     let n = $('spaceNote');
@@ -1059,6 +1126,7 @@ export class SpliceTab {
       <span>Pol II crosses ${esc(this.gene?.gene ?? 'this gene')} (${(m.s1 - m.s0).toLocaleString()} nt) in
       <b>${fmt(p.crossWall)} s</b> of your time — ${esc(dur(p.crossSim))} in the cell at ${fmt(ek ? this.P[ek] : 25, 0)} nt/s.</span>
       <span>${esc(ratio)}${p.limit ? ` · here the picture is held at the <b>${p.limit}</b> watchable pace, so the on-screen difference is smaller than the real one` : ''}</span>
+      ${this.nTotal > this.nShown ? `<span>showing ${this.nShown} of ${this.nTotal} polymerases on the gene (the rest are simulated but not drawn, so each bead can be followed)</span>` : ''}
       <span class="fine">Only the wall-clock tempo is compressed. Every percentage on this page is the exact model at the real rates.</span>`;
   }
 
@@ -1073,7 +1141,7 @@ export class SpliceTab {
       const px = (x) => ctm.a * x + ctm.e;
       o.lane = { x0: px(m(m.s0)), x1: px(m(m.s1)) };
       const pols = (typeof this.sim?.view === 'function' ? this.sim.view() : this.sim?.pols) ?? [];
-      o.marks = pols.map(p => ({ id: p.id, px: px(m(p.pos ?? 0)), nt: p.pos ?? 0, paused: !!p.paused }));
+      o.marks = pols.map(p => ({ id: p.id, px: px(this.dispMap === m && this.disp.has(p.id) ? this.disp.get(p.id).x : m(p.pos ?? 0)), nt: p.pos ?? 0, paused: !!p.paused, drawn: !!this.drawnIds?.has(p.id) }));
     }
     o.pace = this.pace ?? null;
     return o;

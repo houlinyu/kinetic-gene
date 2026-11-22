@@ -334,6 +334,14 @@ function setMode(isSimple) {
   spliceTab?.setSimple(simple);
 }
 document.querySelectorAll('#modeToggle button').forEach(b => b.onclick = () => setMode(b.dataset.m === 'simple'));
+// Simple mode shows ~6 things per panel; this ONE drawer toggle reveals the rest (nothing is
+// deleted: every caveat / validation box is still in the DOM, verbatim, behind it or in Detail).
+function setMore(on) {
+  document.body.classList.toggle('kg-more', on);
+  document.querySelectorAll('[data-kgmore]').forEach(b => { b.textContent = on ? 'hide details ▴' : 'details ▸'; });
+  if (typeof layout === 'function') { try { layout(); } catch {} }
+}
+document.querySelectorAll('[data-kgmore]').forEach(b => b.onclick = () => setMore(!document.body.classList.contains('kg-more')));
 $('allMotifs').onchange = (e) => { allMotifs = e.target.checked; if (gene) setup(); };
 function showRich(e, html, pin) {
   tip.innerHTML = html; tip.classList.add('on', 'rich'); tip.classList.remove('strong');
@@ -660,6 +668,41 @@ function renderPaceNote() {
     <span class="fine">Only the wall-clock tempo is compressed. Every number on this page is the exact model at the real rates.</span>`;
 }
 
+// ---------- readable events (view only) ----------
+// When something decisive happens, a short plain-language tag is held ~1.5 s above the spot.
+// At most 3 on screen and one per kind per lane at a time, so they can actually be read.
+// Read from lane.events BEFORE the view consumes them; nothing here feeds back into the model.
+const evTags = [];
+const EV_TXT = { protein: ['protein made', 'pink', 3], uorfInit: ['started at decoy start', 'amber', 2], drop: ['fell off', 'grey', 1], miss: ['missed the start', 'grey', 1], stall: ['stalled at hairpin', '', 0] };
+function stageTags(lane, view) {
+  const now = performance.now();
+  for (let i = evTags.length - 1; i >= 0; i--) if (now - evTags[i].t0 > 1500 || !evTags[i].el.isConnected) { evTags[i].o.removeFromParent(); evTags[i].el.remove(); evTags.splice(i, 1); }
+  // ribosomes that left the lane since the last frame: fell off after a decoy, or scanned past
+  const prev = lane._seen ?? new Map(), cur = new Map(), found = [];
+  for (const r of lane.ribos) cur.set(r.id, { pos: r.pos, mode: r.mode });
+  for (const [id, r] of prev) if (!cur.has(id)) {
+    if (r.mode === 'uorf') found.push({ kind: 'drop', pos: r.pos });
+    else if (r.mode === 'scan' && r.pos >= lane.iso.len - 3) found.push({ kind: 'miss', pos: lane.iso.len });
+  }
+  lane._seen = cur;
+  if (viewMode !== 'linear' || typeof view?.X !== 'function') return;
+  const evs = [...lane.events, ...found].filter(e => EV_TXT[e.kind]).sort((a, b) => EV_TXT[b.kind][2] - EV_TXT[a.kind][2]);
+  for (const e of evs) {
+    const [text, cls, prio] = EV_TXT[e.kind];
+    const mine = evTags.filter(t => t.view === view);
+    if (evTags.length >= 3 || mine.length >= 2 || mine.some(t => t.kind === e.kind)) continue;
+    if (prio === 0 && (mine.length || now - (view._lastStall ?? 0) < 4000)) continue;   // stalls are frequent: only when quiet
+    if (prio === 0) view._lastStall = now;
+    const el = document.createElement('div'); el.className = 'ev-tag ' + cls; el.textContent = text;
+    const o = new CSS2DObject(el);
+    const pos = e.kind === 'protein' ? lane.iso.len + CDS_STUB * 0.6 : (e.pos ?? e.h?.start ?? 0);
+    const row = mine.some(t => t.row === 0) ? 1 : 0;
+    o.position.set(view.X(Math.min(pos, lane.iso.len + CDS_STUB)), 0.85 + row * 0.34, 0); o.center.set(0.5, 0.5);
+    view.group.add(o);
+    evTags.push({ el, o, view, kind: e.kind, row, t0: now });
+  }
+}
+
 // ---------- loop ----------
 let last = performance.now(), uiClock = 0;
 const fogCol = new THREE.Color();
@@ -671,6 +714,8 @@ function tick(now) {
     // capped so a 100x+ compression cannot cost a frame (0.02 s -> at most 0.06 s per sub-step)
     const simDt = dt * paceT.ts, sub = Math.min(240, Math.max(1, Math.ceil(simDt / 0.02)));
     for (let i = 0; i < sub; i++) { laneA.step(simDt / sub, P); laneB.step(simDt / sub, P); }
+    viewA.maxDraw = viewB.maxDraw = simple ? 6 : Infinity;
+    stageTags(laneA, viewA); stageTags(laneB, viewB);
     viewA.update(dt); viewB.update(dt);
   }
   // tweens
@@ -684,7 +729,13 @@ function tick(now) {
   scene.background.copy(BG_CALM).lerp(BG_STRESS, shown.stress);
   scene.fog.color.copy(fogCol.copy(BG_CALM).lerp(BG_STRESS, shown.stress));
   uiClock += dt;
-  if (uiClock > 0.06 && laneA) { uiClock = 0; renderNumbers(); renderPaceNote(); }
+  if (uiClock > 0.06 && laneA) {
+    uiClock = 0; renderNumbers(); renderPaceNote();
+    // Simple mode: the per-lane cards are behind "details", so echo lane A's own calm -> stress
+    // readout (same text, same numbers as its card) under the headline while stress is on.
+    const sl = $('stressLine'), cs = $('csA')?.textContent?.trim();
+    if (sl) sl.textContent = stressed() && cs ? `${laneA.iso.name}: ${cs}` : '';
+  }
   controls.update();
   composer.render(); labels.render(scene, camera);
 }

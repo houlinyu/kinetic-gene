@@ -186,8 +186,16 @@ export class LaneView {
     const lane = this.lane; if (!lane) return;
     const m = new THREE.Matrix4(); const c = new THREE.Color();
     let n = 0;
+    // Simple mode: cap how many ribosomes are DRAWN (view only; the model runs all of them).
+    // The stride only grows quickly and relaxes slowly, so beads do not flicker in and out.
+    const cap = this.maxDraw ?? Infinity, cnt = (this.lane?.ribos ?? []).length;
+    let stride = this._stride ?? 1;
+    if (cnt / stride > cap) stride *= 2; else if (stride > 1 && cnt / (stride / 2) <= cap * 0.7) stride /= 2;
+    if (!(cap < Infinity)) stride = 1;
+    this._stride = stride;
     for (const r of lane.ribos) {
       if (n >= MAX_RIBO) break;
+      if (stride > 1 && Math.floor(r.id * 1e6) % stride) continue;
       const wobble = r.mode === 'scan' && r.waitHp ? Math.sin(performance.now() * 0.03 + r.id * 50) * 0.02 : 0;
       m.makeTranslation(this.X(r.pos) + wobble, 0.0, 0.0);
       this.riboMesh.setMatrixAt(n, m);
