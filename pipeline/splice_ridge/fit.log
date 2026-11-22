@@ -1,0 +1,73 @@
+[    0.7s] loaded tables
+rows=38027 genes=7751
+[    1.2s] start CV
+[    1.3s] fold
+[    1.3s] fold
+[    1.4s] fold
+[    1.4s] fold
+[    1.4s] fold
+[    1.8s] baselines done
+[    1.9s] metrics done
+[    1.9s] start within-gene
+[    5.0s] marginals done
+[    5.3s] head-to-head done
+[    5.3s] within-gene done
+[    5.5s] boot 0
+[    6.1s] boot 10
+[    6.8s] boot 20
+[    7.4s] boot 30
+[    8.0s] boot 40
+[    8.7s] boot 50
+[    9.4s] boot 60
+[   10.0s] boot 70
+[   10.6s] boot 80
+[   11.3s] boot 90
+[   12.0s] boot 100
+[   12.6s] boot 110
+[   13.2s] boot 120
+[   13.9s] boot 130
+[   14.5s] boot 140
+[   15.1s] boot 150
+[   15.8s] boot 160
+[   16.5s] boot 170
+[   17.1s] boot 180
+[   17.8s] boot 190
+[   18.4s] bootstrap done
+[   18.7s] app12 usage: 275 transcripts
+done
+n=38027 isoforms, 7751 genes, pairs=122174
+method                         r2  pearson  spearman  within-gene
+ridge                       0.209    0.457     0.363        0.561
+ridge_renormalised         -0.715    0.278     0.213        0.558
+ridge_logit_softmax        -0.596    0.331     0.211        0.573
+ridge_splice_only           0.014    0.120     0.137        0.538
+uniform                    -0.601    0.226     0.156        0.500
+longest_wins               -2.280    0.312     0.211        0.518
+dominant_tss_only          -3.178    0.103     0.062        0.499
+confound_tx_length       -349.290    0.072     0.084        0.548
+confound_n_exons         -7106.072   -0.017    -0.031        0.483
+confound_read_support    -482548.263    0.029     0.128        0.780
+
+head-to-head (same pairs):
+  ridge_vs_confound_tx_length          ridge right/other wrong  22052 | other right/ridge wrong  20446 | p=6.7e-15
+  ridge_vs_confound_n_exons            ridge right/other wrong  40354 | other right/ridge wrong  18327 | p=0
+  ridge_vs_longest_wins                ridge right/other wrong  56342 | other right/ridge wrong     26 | p=0
+  ridge_vs_ridge_splice_only           ridge right/other wrong  23677 | other right/ridge wrong  20889 | p=8e-40
+
+--- 12 app genes (mechanistic model available) ---
+n=56 isoforms, 12 genes
+method                   r2  spearman  within-gene  pairs
+mech                 -0.162     0.561        0.653    124
+ridge                 0.059     0.462        0.548     31
+mes_donor_min      -806.575     0.427        0.569    124
+mes_acc_min        -1020.279     0.134        0.520    124
+mes_donor_mean     -1562.934     0.390        0.548    124
+mes_acc_mean       -1973.690     0.205        0.532    124
+cage                 -2.135     0.531        0.676     51
+is_dom_cage          -3.541     0.510        0.629    124
+tx_len             -404583294.189     0.215        0.649    124
+n_exons            -2523.081    -0.020        0.585    124
+read_support       -2981344.526     0.812        0.948    124
+uniform               0.126     0.481        0.500    124
+ridge_compact         0.015     0.500        0.661    124
+

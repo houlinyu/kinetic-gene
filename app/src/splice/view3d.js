@@ -9,6 +9,13 @@
 // illustration of the kinetic model, and only the lead polymerase is drawn.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+// same signature effect as the ② Translation page (app/src/main.js): bloom on the few HDR things
+import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
+// which isoform the single transcript this view follows has committed to so far (see diversity.js)
+import { polSignature } from './diversity.js';
 
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
@@ -135,6 +142,15 @@ export class Splice3DView {
     this.scene.add(new THREE.HemisphereLight(0xdde6ff, 0x20242e, 1.15));
     const dl = new THREE.DirectionalLight(0xffffff, 1.0); dl.position.set(40, 70, 60); this.scene.add(dl);
     this.world = new THREE.Group(); this.scene.add(this.world);
+    // bloom with the ② Translation page's own parameters (strength .45, radius .25, threshold .95),
+    // so the moving machinery reads the same on both pages. Only the unlit HDR cores pass the
+    // threshold, so labels, DNA and exon geometry stay sharp.
+    try {
+      this.composer = new EffectComposer(this.renderer);
+      this.composer.addPass(new RenderPass(this.scene, this.camera));
+      this.composer.addPass(new UnrealBloomPass(new THREE.Vector2(innerWidth / 2, innerHeight / 2), 0.45, 0.25, 0.95));
+      this.composer.addPass(new OutputPass());
+    } catch (e) { console.warn('splice3d: bloom unavailable, rendering without it', e); this.composer = null; }
     this.controls.target.set(0, -16, 0);
     this.ov = document.createElement('div'); this.ov.className = 's3-ov'; host.appendChild(this.ov);
     this.bar = document.createElement('div'); this.bar.className = 's3-bar'; this.bar.innerHTML = '<i></i><span>10 nm</span>';
@@ -237,8 +253,15 @@ export class Splice3DView {
     this.u2G = this.particle(null, COL.u2, 14);
     this.u2G.userData.approx = true;
     this.lariat = new THREE.Mesh(new THREE.TorusGeometry(6, 0.45, 6, 28),
-      new THREE.MeshStandardMaterial({ color: COL.intron, roughness: .6, transparent: true }));
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(COL.intron).multiplyScalar(1.9), transparent: true }));
     this.world.add(this.lariat);
+    // unlit HDR cores: the "bright dots" of this page (cf. the ribosome cores on ② Translation)
+    this.polCore = new THREE.Mesh(new THREE.SphereGeometry(Math.max(2.2, this.K.pol.value * 0.11), 14, 10),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(0xffffff).multiplyScalar(2.3) }));
+    this.polG.add(this.polCore);
+    this.splCore = new THREE.Mesh(new THREE.SphereGeometry(Math.max(2, this.K.spl.value * 0.09), 14, 10),
+      new THREE.MeshBasicMaterial({ color: new THREE.Color(COL.spl).multiplyScalar(2.2) }));
+    this.splG.add(this.splCore);
     for (const g of [this.splG, this.u1G, this.u2G, this.lariat]) g.visible = false;
   }
 
@@ -252,10 +275,14 @@ export class Splice3DView {
     this.rna.geometry.setDrawRange(0, 0); this.rnaBeads.count = 0;
   }
   setParams(P) { this.P = P; }
+  // The combinatorial space of the current gene (diversity.space), handed over by view.js so the
+  // 3D view can name the isoform the transcript it is following has committed to so far.
+  setSpace(sp) { this.sp = sp ?? null; }
   setActive(on) { this.active = on; if (on) this.resize(); }
   resize() {
     const w = this.host.clientWidth || 800, h = this.host.clientHeight || 600;
     this.renderer.setSize(w, h, false);
+    this.composer?.setSize(w, h);
     this.camera.aspect = w / h; this.camera.updateProjectionMatrix();
   }
   kindAt(pos) {
@@ -388,7 +415,20 @@ export class Splice3DView {
     }
     this.controls.target.set(0, -16, 0);
     this.controls.update();
-    this.renderer.render(this.scene, this.camera);
+    // the bright core carries the identity colour of the transcript being followed (white while it
+    // is still moving and undecided), so the glow says WHICH isoform this molecule is becoming
+    this.idChip = null; this.idColour = null;
+    if (p && this.sp) {
+      try { const sg = polSignature(this.gene, this.J, this.sp, p); this.idChip = sg.chip; this.idColour = sg.resolved ? sg.colour : '#ffffff'; }
+      catch { /* identity is a nicety; never let it stop the frame */ }
+    }
+    if (this.polCore) {
+      const c = this.idColour ?? '#ffffff';
+      this.polCore.material.color.set(c).multiplyScalar(p?.paused ? 1.1 : 2.3);
+      this.polCore.visible = true;
+    }
+    if (this.splCore) this.splCore.visible = this.splG.visible;
+    if (this.composer) this.composer.render(); else this.renderer.render(this.scene, this.camera);
     this.overlay(p, live, haveU2, haveSpl, cut);
   }
   overlay(p, live, haveU2, haveSpl, cut) {
@@ -406,7 +446,9 @@ export class Splice3DView {
       d.style.top = ((-v.y * .5 + .5) * h).toFixed(0) + 'px';
     };
     const pdb = (g) => (g.userData.meta?.pdb ? ` · PDB ${g.userData.meta.pdb}` : ' · approximate shape');
-    put('pol', (p?.paused ? 'Pol II — paused' : 'Pol II') + pdb(this.polG), this.polG, 'pol');
+    // the identity of the ONE transcript this view follows: promoter + the choices it has made
+    const id = this.idChip ? ` · this transcript: ${this.idChip}` : '';
+    put('pol', (p?.paused ? 'Pol II — paused' : 'Pol II') + pdb(this.polG) + id, this.polG, 'pol');
     put('u1', 'U1 snRNP at the 5′ss' + pdb(this.u1G), this.u1G, 'u1');
     put('u2', 'U2 at the branch point · approximate shape', this.u2G, 'u2');
     put('spl', 'spliceosome' + pdb(this.splG), this.splG, 'spl');

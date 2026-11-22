@@ -12,6 +12,13 @@
 // competition model so the page still renders.
 
 const MODS = import.meta.glob('./*.js');
+// ISOFORM DIVERSITY: the combinatorial space (promoter × splice-site choices), the live
+// per-transcript identity chips, the divergence watch and the ② Translation join.
+// Pure module owned alongside this file; every probability it prints comes from expected().
+import * as DIV from './diversity.js';
+// Wall-clock pacing (view only). The model keeps nt/s and seconds; this decides how many model
+// seconds pass per second of your time, and the factor is printed live in #spaceNote.
+import * as pace from '../pace.js';
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const fmt = (x, d = 1) => (x == null || !Number.isFinite(x) ? '—' : Number(x).toFixed(d));
@@ -19,6 +26,9 @@ const pct = (x) => (Number.isFinite(x) ? (100 * x).toFixed(0) + '%' : '—');
 const clamp = (x, a, b) => Math.max(a, Math.min(b, x));
 const SVGNS = 'http://www.w3.org/2000/svg';
 const ntSort = (a, b) => a.start - b.start;
+// seconds -> "5 h 19 min" / "4 min 34 s" / "42 s", for the time-compression line
+const dur = (s) => (s >= 3600 ? `${Math.floor(s / 3600)} h ${Math.round((s % 3600) / 60)} min`
+  : s >= 60 ? `${Math.floor(s / 60)} min ${Math.round(s % 60)} s` : `${s.toFixed(s < 10 ? 1 : 0)} s`);
 
 // ---------------------------------------------------------------- fallback parameters
 // Only used when splice/params.js is missing. Same contract as app/src/params.js:
@@ -211,6 +221,20 @@ function makeMap(g, J, W, padL, padR) {
   return map;
 }
 
+// How much faster the bead moves through the most expanded segment of the compressed x axis than
+// it would on a linear one (1 = linear). Clamped: ESR1 would otherwise read ~50x.
+function burstOf(m) {
+  if (!m?.segs?.length) return 1;
+  if (m._burst != null) return m._burst;
+  const totPx = m.segs.reduce((a, s) => a + s.px, 0) || 1;
+  const totNt = m.segs.reduce((a, s) => a + Math.max(1, s.e - s.s), 0) || 1;
+  const mean = totPx / totNt;
+  let worst = mean;
+  for (const s of m.segs) if (!s.lead) worst = Math.max(worst, s.px / Math.max(1, s.e - s.s));
+  m._burst = Math.min(Math.max(worst / mean, 1), 60);
+  return m._burst;
+}
+
 // ---------------------------------------------------------------- svg helpers
 const el = (tag, attrs, parent) => {
   const n = document.createElementNS(SVGNS, tag);
@@ -239,7 +263,10 @@ export class SpliceTab {
   constructor() {
     this.PARAMS = FALLBACK_PARAMS; this.SOURCES = FALLBACK_SOURCES;
     this.P = {}; for (const [k, d] of Object.entries(FALLBACK_PARAMS)) this.P[k] = d.value;
-    this.speed = 150;                 // animation × real time (splicing takes minutes)
+    // RELATIVE animation speed: 1 = the watchable pace pace.js solves for this gene and these
+    // rates. The absolute compression it works out to is this.pace.ts, printed on the page.
+    this.mul = 1; this.animRange = { min: 0.25, max: 4, step: 0.25 };
+    this.pace = { ts: 150, crossSim: 1, crossWall: 1 };
     this.view = 'diagram'; this.simple = true; this.active = false;
     this.data = null; this.gene = null; this.sim = null; this.exp = null;
     this.v3 = null; this.raf = null; this.last = 0; this.t = 0;
@@ -247,6 +274,11 @@ export class SpliceTab {
     // set by main.js: open one of these isoforms' 5′ leader on the ② Translation page.
     // Returns null on success, or the reason it is not there (which is printed on the rows).
     this.onTranslate = null; this.xnote = null;
+    // --- isoform diversity: combinatorial space, live per-transcript identity, divergence watch
+    this.sp = null;                      // DIV.space() for the current gene
+    this.sigs = [];                      // one signature per live polymerase (this tick)
+    this.dw = new DIV.DivergenceWatch();
+    this.divPulse = [];                  // one-shot "same site, different choice" pulses
     try { if (localStorage.getItem('splice-view') === 'struct3d') this.view = 'struct3d'; } catch {}
   }
 
@@ -266,6 +298,7 @@ export class SpliceTab {
     });
     const all = $('sAllGenes');
     if (all) all.onchange = () => this.fillGenes();
+    this.mountDiversity();
     await this.loadMods();
     this.renderControls(); this.renderSources();
     await this.loadData();
@@ -276,6 +309,7 @@ export class SpliceTab {
     const [m, x, p] = await Promise.all([get('model.js'), get('model_exact.js'), get('params.js')]);
     this.Gene = m?.Gene ?? null;
     this.junctionsFn = typeof m?.junctions === 'function' ? m.junctions : null;
+    this.tssListFn = typeof m?.tssList === 'function' ? m.tssList : null;
     this.expectedFn = typeof x?.expected === 'function' ? x.expected : null;
     this.calibrateFn = typeof x?.calibrate === 'function' ? x.calibrate : null;
     if (p?.PARAMS) {
@@ -302,7 +336,7 @@ export class SpliceTab {
     $('sprov').innerHTML = this.placeholder
       ? '<b class="warn">Placeholder gene geometry — <code>splice_data.json</code> was not found, so the layout below is an illustration and the splice-site scores are blank.</b>'
       : `Transcripts: ${esc(meta.release ?? 'see sources')}${meta.methods?.ss_score ? ` · splice-site scores: ${esc(meta.methods.ss_score)}` : ''}${meta.methods?.psi ? ` · PSI: ${esc(meta.methods.psi)}` : ''}.
-         Percentages are expected values from the ${this.expectedFn ? 'exact splicing model' : 'fallback model'}; the beads are a stochastic simulation of the same rules, ${this.speed}× real time. Model, not measurement.`;
+         Percentages are expected values from the ${this.expectedFn ? 'exact splicing model' : 'fallback model'}; the beads are a stochastic simulation of the same rules, run at the compressed wall-clock tempo stated above the gene diagram. Model, not measurement.`;
     this.setGene(this.genes.find(g => DEFAULT_GENES.includes(g.gene)) ?? this.genes[0]);
   }
 
@@ -340,7 +374,7 @@ export class SpliceTab {
     if (on) { this.resize(); this.last = performance.now(); if (!this.raf) this.loop(); this.v3?.setActive(this.view === 'struct3d'); }
     else { if (this.raf) cancelAnimationFrame(this.raf); this.raf = null; this.v3?.setActive(false); }
   }
-  setSimple(s) { this.simple = s; this.renderControls(); if (this.gene) this.renderPanel(); }
+  setSimple(s) { this.simple = s; this.renderControls(); if (this.gene) { this.renderPanel(); this.renderDiversity(); } }
 
   // ---------- the slow-Pol II moment ----------
   slowVal() {
@@ -353,7 +387,7 @@ export class SpliceTab {
     const k = this.role.elong; if (!k) return;
     this.setP(k, on ? this.slowVal() : this.P0[k]);
     this.syncSlowUI();
-    this.renderControls(); this.recalc();
+    this.renderControls(); this.recalc(); this.renderPace();
   }
   syncSlowUI() {
     const on = this.isSlow(), k = this.role.elong;
@@ -381,7 +415,7 @@ export class SpliceTab {
         this.v3 = new mod.Splice3DView($('splice3d'));
         this.v3.onReady = () => this.note();   // the PDB assets land a moment later
       } catch (e) { console.warn('splice: 3D view failed', e); $('sviewNote').innerHTML = '<b class="warn">3D view failed to start — see the console.</b>'; return; }
-      if (this.gene) this.v3.build(this.gene, this.J, this.P);
+      if (this.gene) { this.v3.build(this.gene, this.J, this.P); this.v3.setSpace?.(this.sp); }
     }
     this.v3.setActive(this.active && this.view === 'struct3d');
     this.resize(); this.note();
@@ -392,6 +426,100 @@ export class SpliceTab {
       : `<b>Real: the exon/intron structure and the splice-site scores${this.placeholder ? ' (none in this placeholder)' : ''}. Illustrative: the moving Pol II, the loops and the bins are an animation of the kinetic model.</b>
          Arc thickness above the gene = predicted usage of that junction. Introns are ${this.map?.compressed ? 'log-compressed' : 'drawn to scale'}; percentages are expected values from the ${this.expectedFn ? 'exact model' : 'fallback model'}, not the bead counts.`;
     n.style.display = '';
+  }
+
+  // ---------- isoform diversity: the combinatorial space, and the live identities ----------
+  // The panel block is created from here rather than index.html so this feature is additive.
+  mountDiversity() {
+    const host = $('splicePanel'); if (!host || $('sdiv')) return;
+    // headline counts + what is alive on the gene right now, directly under the fractions…
+    const top = document.createElement('div');
+    top.id = 'sdivtop';
+    top.innerHTML = '<div class="dvtopbody"></div>';
+    (($('sheadline') ?? null) ? host.insertBefore(top, $('sheadline')) : host.appendChild(top));
+    // …and the fan-out tree itself lower down, next to the simulated bins it explains
+    const d = document.createElement('div');
+    d.id = 'sdiv';
+    d.innerHTML = '<div class="ftitle">Where those isoforms come from — promoter × splice-site choices</div><div class="dvbody"><div class="shl-load">…</div></div>';
+    (($('sbins') ?? null) ? host.insertBefore(d, $('sbins')) : host.appendChild(d));
+    // "→ translate this isoform" on the tree leaves: same action as the rows above, delegated
+    top.addEventListener('click', (e) => {
+      const h = e.target.closest?.('.dvnode'); if (h) h.classList.toggle('open');
+    });
+    d.addEventListener('click', (e) => {
+      const b = e.target.closest?.('button.sxl');
+      if (b) {
+        const why = this.onTranslate?.(this.gene?.gene, b.dataset.iso);
+        this.xnote = why ?? null;
+        this.renderPanel(); this.renderDiversity();
+        return;
+      }
+      const h = e.target.closest?.('.dvnode');
+      if (h) h.classList.toggle('open');
+    });
+    // the ② Translation join (protein per mRNA per isoform) and the measured Isopedia usage both
+    // load in the background; each re-renders when it lands
+    DIV.translation().then(() => { if (this.gene) { this.renderDiversity(); this.renderPanel(); } });
+    DIV.usage().then(() => { if (this.gene) { this.renderDiversity(); this.renderPanel(); } });
+  }
+  // Full re-render of the fan-out tree: only on gene / parameter change (it is a big DOM).
+  renderDiversity() {
+    const host = $('sdiv'); if (!host || !this.gene) return;
+    const body = host.querySelector('.dvbody'); if (!body) return;
+    const top = $('sdivtop')?.querySelector('.dvtopbody');
+    if (!this.sp || !this.exp) { body.innerHTML = '<div class="shl-load">…</div>'; return; }
+    try {
+      if (top) {
+        // The measured validation comes FIRST: it is the only thing on this page that was tested
+        // against data, and it does not flatter the model.
+        top.innerHTML = DIV.validationHTML(this.gene.gene)
+          + DIV.denominatorHTML(this.gene.gene)
+          + `<div class="ftitle">How many real choices does this gene make?</div>`
+          + DIV.countHTML(this.gene, this.J, this.sp, this.exp)
+          + `<div id="sdivlive"></div>`;
+      }
+      body.innerHTML = `<div class="dvlegend">Every % here is an expected value from the ${this.expectedFn ? 'exact splicing model' : 'fallback model'}, never the bead counts:
+             promoter branches use the model's own promoter weights, junction branches its <code>junctionUse</code>, leaves its isoform fractions.
+             <b>No transcript is an average:</b> each polymerase on the gene picks one promoter and resolves each competing junction one way, so the chip above each nascent RNA is that transcript's isoform as far as it has been decided.</div>`
+        + DIV.treeHTML(this.gene, this.J, this.sp, this.exp, { simple: this.simple, onTranslate: !!this.onTranslate });
+    } catch (e) {
+      console.warn('splice: diversity render failed', e);
+      body.innerHTML = '<div class="sbad"><b>The isoform-space diagram failed to render for this gene</b> — see the console. The numbers above are unaffected.</div>';
+    }
+    this.renderDivLive();
+  }
+  // Cheap, per-frame part: what is live on the gene right now and the divergences seen.
+  renderDivLive() {
+    const el = $('sdivlive'); if (!el) return;
+    const sigs = this.sigs ?? [];
+    const rows = sigs.slice(0, 6).map(s => `<div class="dvlive" style="--idc:${s.colour}"><span class="dvchip">${esc(s.chip)}</span>
+      <span class="mute">${s.resolved ? 'decided' : `${s.open} decision${s.open > 1 ? 's' : ''} still open`}</span></div>`).join('');
+    const log = (this.dw.log ?? []).map(d => `<div class="dvdiv"><b>same site, different choice</b> at ${esc(this.siteName(d.at))}: <b>${esc(d.a)}</b> vs <b>${esc(d.b)}</b></div>`).join('');
+    el.innerHTML = `<div class="dvliveh">${sigs.length} transcript${sigs.length === 1 ? '' : 's'} being written right now${this.dw.count ? ` · ${this.dw.count} divergence${this.dw.count === 1 ? '' : 's'} seen` : ''}</div>
+      ${rows || '<div class="mute dvnone">waiting for the first polymerase to initiate…</div>'}${log}`;
+  }
+  // A competing group starts at one 5′ss when every junction in it shares that donor (a plain
+  // 5′-site choice); otherwise it is a race between junctions with different donors, and saying
+  // "the 5′ss" would be wrong.
+  siteName(at) {
+    const g = (this.sp?.groups ?? []).find(x => x.at === at);
+    const same = g && g.members.every(i => (this.J[i].donorPos ?? this.J[i].start) === at);
+    const nt = Number(at).toLocaleString();
+    return same ? `the 5′ss at ${nt} nt` : `the junction race that opens at ${nt} nt`;
+  }
+  // one signature per live polymerase, plus the divergence watch (runs in both views)
+  tickIdentity(pols, dt = 1 / 60) {
+    if (!this.sp) { this.sigs = []; return; }
+    try {
+      this.sigs = pols.map(p => {
+        const s = DIV.polSignature(this.gene, this.J, this.sp, p);
+        s.polId = p.id; s.pos = p.pos; s.tssPos = p.tssPos; s.paused = p.paused;
+        return s;
+      });
+      for (const d of this.dw.tick(this.sigs, this.t)) this.divPulse.push({ ...d, age: 0 });
+    } catch (e) { console.warn('splice: identity tick failed', e); this.sigs = []; }
+    for (const p of this.divPulse) p.age += dt;
+    this.divPulse = this.divPulse.filter(p => p.age < 2.6).slice(-3);
   }
 
   // ---------- gene ----------
@@ -409,9 +537,10 @@ export class SpliceTab {
     this.map = makeMap(g, this.J, VIEW_W, 58, 26);
     this.sim = this.makeSim();
     this.anim = []; this.drops = []; this.evAt = 0;
+    this.sigs = []; this.divPulse = []; this.dw.reset();   // identity/divergence state is per gene
     this.buildSVG();
     this.v3?.build(g, this.J, this.P);
-    this.recalc(); this.note(); this.syncSlowUI(); this.renderGeneNotes();
+    this.recalc(); this.note(); this.syncSlowUI(); this.renderGeneNotes(); this.renderPace();
   }
   makeSim() {
     if (this.Gene) {
@@ -439,7 +568,13 @@ export class SpliceTab {
     const k = this.role.elong;
     this.cmpFast = k ? this.expectedOf({ ...this.P, [k]: this.P0[k] }) : this.exp;
     this.cmpSlow = k ? this.expectedOf({ ...this.P, [k]: this.slowVal() }) : this.exp;
+    // the combinatorial space (cheap: ~1 ms/gene) is rebuilt whenever the numbers move, because the
+    // branch labels and the near-deterministic flags are expected()'s own values
+    try { this.sp = DIV.space(this.gene, this.J, this.tssListFn ? this.tssListFn(this.gene) : (this.gene.tss ?? []), this.exp); }
+    catch (e) { console.warn('splice: diversity space failed', e); this.sp = null; }
     this.renderPanel();
+    this.renderDiversity();
+    this.v3?.setSpace?.(this.sp);
     this.v3?.setParams(this.P);
   }
   expectedOf(P) {
@@ -482,6 +617,20 @@ export class SpliceTab {
       <div class="smodlim">${bits.join(' ')}</div>`;
   }
 
+  // abundance × protein-per-mRNA: this isoform's share of the gene's protein output, over the
+  // isoforms that HAVE a 5′ leader in utr_data.json (the others say so instead of being counted).
+  trShare(rows, f) {
+    if (!DIV.translationReady() || !this.gene) return null;
+    let den = 0;
+    for (const r of rows) {
+      if (r.artifact) continue;
+      const e = DIV.trEntry(this.gene.gene, r.name);
+      if (e) den += r.value * e.perMin;
+    }
+    const e = DIV.trEntry(this.gene.gene, f.name);
+    return e && den > 0 ? f.value * e.perMin / den : null;
+  }
+
   // ---------- panel ----------
   renderPanel() {
     const g = this.gene;
@@ -489,7 +638,7 @@ export class SpliceTab {
     const rows = this.isoRows(this.exp);
     $('sheadline').innerHTML = `<div class="ftitle">Predicted isoform fractions ${this.exp.fallback ? '<span class="warn">(fallback model)</span>' : ''}</div>
       ${rows.length ? rows.map(f => `<div class="sfr${f.artifact ? ' art' : ''}${f.value > 0.0005 ? '' : ' zero'}" title="${f.artifact ? 'junction combinations that match no annotated transcript — the model has no intron-retention state' : f.value > 0.0005 ? esc(f.name) : esc(f.name) + ' — 0%: every junction it uses is a strict subset of another isoform’s set, so this model can never reach it. It may still be a real transcript.'}"><span class="n">${esc(f.name)}</span><span class="b"><i style="width:${(100 * clamp(f.value, 0, 1)).toFixed(1)}%"></i></span><span class="v">${pct(f.value)}</span>${this.onTranslate && !f.artifact
-        ? `<button type="button" class="sxl" data-iso="${esc(f.name)}" title="run the ribosome-scanning model on this isoform's 5′ leader (② Translation page)">→ translate this isoform</button>` : ''}</div>`).join('')
+        ? `<button type="button" class="sxl" data-iso="${esc(f.name)}" title="run the ribosome-scanning model on this isoform's 5′ leader (② Translation page)">→ translate this isoform</button>` : ''}${f.artifact ? '' : DIV.measChip(g.gene, f.id)}${f.artifact ? '' : DIV.trChip(g.gene, f.name, f.value, this.trShare(rows, f))}</div>`).join('')
         : '<div class="shl-load">this gene has no competing junctions in the data</div>'}
       ${this.xnote ? `<div class="sbad">${this.xnote}</div>` : ''}
       ${this.modelLimitHTML(rows)}
@@ -502,7 +651,7 @@ export class SpliceTab {
       ${n.total >= ENOUGH
         ? rows.map(f => `<div class="sfr sim" title="${esc(f.name)}"><span class="n">${esc(f.name)}</span><span class="b"><i style="width:${(100 * n.frac(f.id)).toFixed(1)}%"></i></span><span class="v">${pct(n.frac(f.id))}</span></div>`).join('')
           + '<div class="fine">stochastic simulation of the same rules — it converges on the numbers above once a few hundred transcripts have finished</div>'
-        : `<div class="fine">warming up — ${n.total} of ${ENOUGH} transcripts needed before the sampled fractions are worth showing (the simulation is ${this.speed}× real time; splicing a gene takes minutes).</div>`}`;
+        : `<div class="fine">warming up — ${n.total} of ${ENOUGH} transcripts needed before the sampled fractions are worth showing (${pace.label(this.pace.ts)}; splicing a gene takes minutes).</div>`}`;
     const ev = (this.sim?.events ?? []).slice(-7).reverse();
     $('sevents').innerHTML = ev.length
       ? `<div class="ftitle">Last events</div><div class="sev">${ev.map(x => `<span>${esc(x.kind)}${x.intron ? ' ' + esc(x.intron) : ''}${x.name ? ' → ' + esc(x.name) : x.isoform ? ' → ' + esc(x.isoform) : ''}</span>`).join('')}</div>` : '';
@@ -550,16 +699,18 @@ export class SpliceTab {
         <span class="v" data-pv="${k}">${this.P[k]}${d.unit ? ' ' + d.unit : ''}</span></label>`;
     };
     $('sctrls').innerHTML = head.map(row).join('');
-    $('sctrlsAll').innerHTML = `<label class="sctl"><span class="l">animation speed × real time</span><input type="range" data-pk="_speed" min="10" max="600" step="10" value="${this.speed}"><span class="v" data-pv="_speed">${this.speed}×</span></label>`
+    const ar = this.animRange;
+    $('sctrlsAll').innerHTML = `<label class="sctl"><span class="l">animation speed × the watchable pace <small>(the absolute compression is worked out per gene and shown above the gene diagram)</small></span><input type="range" data-pk="_speed" min="${ar.min}" max="${ar.max}" step="${ar.step}" value="${this.mul}"><span class="v" data-pv="_speed">${this.mul}×</span></label>`
       + Object.keys(this.PARAMS).filter(k => !head.includes(k)).map(row).join('');
     for (const inp of document.querySelectorAll('#splicePanel [data-pk]')) {
       const k = inp.dataset.pk;
       inp.oninput = () => {
         const v = +inp.value;
-        if (k === '_speed') this.speed = v; else this.setP(k, v);
+        if (k === '_speed') this.mul = v; else this.setP(k, v);
         const out = document.querySelector(`[data-pv="${k}"]`);
         if (out) out.textContent = k === '_speed' ? v + '×' : v + (this.PARAMS[k]?.unit ? ' ' + this.PARAMS[k].unit : '');
         if (k !== '_speed') { this.syncSlowUI(); this.recalc(); }
+        this.renderPace();
       };
     }
   }
@@ -578,6 +729,16 @@ export class SpliceTab {
     const defs = el('defs', {}, this.svg);
     const mk = el('marker', { id: 'arr', viewBox: '0 0 10 10', refX: 8, refY: 5, markerWidth: 6, markerHeight: 6, orient: 'auto' }, defs);
     el('path', { d: 'M0 0 L10 5 L0 10 z', fill: COL.exon }, mk);
+    // the ② Translation page's bright-dot look, done cheaply in SVG: one blur+merge filter, applied
+    // ONLY to moving actors (Pol II, committed spliceosome, lariat, finished transcripts) — never to
+    // text, exon boxes or splice-site scores, which the layout audit found crowded already.
+    const fl = el('filter', { id: 'sglow', x: '-120%', y: '-120%', width: '340%', height: '340%' }, defs);
+    el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: 3.2, result: 'b1' }, fl);
+    el('feGaussianBlur', { in: 'SourceGraphic', stdDeviation: 7, result: 'b2' }, fl);
+    const fm = el('feMerge', {}, fl);
+    el('feMergeNode', { in: 'b2' }, fm);
+    el('feMergeNode', { in: 'b1' }, fm);
+    el('feMergeNode', { in: 'SourceGraphic' }, fm);
     const Y = this.Y = { dna: 150, rna: 290, bin: 414 };
     const root = el('g', {}, this.svg);
     const alt = (t) => t && !['constitutive', 'first', 'last'].includes(t);
@@ -693,8 +854,10 @@ export class SpliceTab {
 
   // ---------- per-frame ----------
   pump(dt) {
-    const want = dt * this.speed;
-    const n = clamp(Math.ceil(want / SUBSTEP), 1, 40);
+    this.pace = this.solvePace();
+    const want = dt * this.pace.ts;
+    // more sub-steps than before: a 1000x+ compression on a 478 kb gene must not coarsen the race
+    const n = clamp(Math.ceil(want / SUBSTEP), 1, 160);
     for (let i = 0; i < n; i++) { try { this.sim.step(want / n, this.P); } catch (e) { console.warn('splice: step failed', e); this.sim = new FbSim(this.gene, this.J); break; } }
     // consume events for the one-shot animations
     const ev = this.sim.events ?? [];
@@ -702,12 +865,17 @@ export class SpliceTab {
     for (; this.evAt < ev.length; this.evAt++) {
       const e = ev[this.evAt];
       if (e.kind === 'spliced') this.anim.push({ kind: 'lariat', pol: e.pol, intron: e.intron, age: 0 });
-      else if (e.kind === 'finished') this.drops.push({ key: e.isoform ?? 'other', age: 0 });
+      // the finished transcript falls in the colour of the isoform it became (same key the tree
+      // leaves use), so the drop, the leaf and the bin all agree
+      else if (e.kind === 'finished') this.drops.push({ key: e.isoform ?? 'other', age: 0, colour: e.isoform && e.isoform !== 'other' ? DIV.idColour(e.isoform) : COL.intron });
     }
     for (const a of this.anim) a.age += dt;
     this.anim = this.anim.filter(a => a.age < 1.5).slice(-12);
     for (const d of this.drops) d.age += dt;
     this.drops = this.drops.filter(d => d.age < 1.1).slice(-20);
+    // per-transcript identity + the "same site, different choice" watch: done here, not in frame(),
+    // so it also runs while the 3D view is on screen
+    this.tickIdentity((typeof this.sim.view === 'function' ? this.sim.view() : this.sim.pols) ?? [], dt);
   }
   frame(dt) {
     const g = this.gene, m = this.map, Y = this.Y;
@@ -715,6 +883,9 @@ export class SpliceTab {
     const pols = (typeof this.sim.view === 'function' ? this.sim.view() : this.sim.pols) ?? [];
     this.gPol.innerHTML = ''; this.gRNA.innerHTML = '';
     const byId = new Map(this.J.map(j => [j.id, j]));
+    // each nascent transcript's own emerging isoform (promoter + the choices it has made so far)
+    const sigBy = new Map((this.sigs ?? []).map(s => [s.polId, s]));
+    this.chipRow = {};
     for (const p of pols.slice(0, 8)) {
       const pos = p.pos ?? 0, x = m(pos);
       const rem = new Set(p.removed ?? []), com = new Set(p.committed ?? []), dead = new Set(p.skipped ?? []);
@@ -739,7 +910,7 @@ export class SpliceTab {
           const h = clamp(26 + (b - a) * 0.45, 24, 92);
           d += ` C${a + (b - a) * 0.08} ${Y.rna + h}, ${b - (b - a) * 0.08} ${Y.rna + h}, ${b} ${Y.rna}`;
           if (com.has(j.id)) { // spliceosome committed to this intron: amber bead on the loop
-            const c = el('circle', { cx: (a + b) / 2, cy: Y.rna + h * 0.78, r: 6, fill: COL.alt, opacity: .9 }, this.gRNA);
+            const c = el('circle', { cx: (a + b) / 2, cy: Y.rna + h * 0.78, r: 6, fill: COL.alt, opacity: .9, class: 'glow' }, this.gRNA);
             el('title', {}, c).textContent = `${j.id}: spliceosome committed, waiting to cut`;
             if (b - a > 90) el('text', { x: (a + b) / 2, y: Y.rna + h * 0.78 + 17, class: 'slab alt', 'text-anchor': 'middle' }, this.gRNA).textContent = 'committed';
           }
@@ -747,31 +918,37 @@ export class SpliceTab {
         cur = Math.min(j.end, pos);
       }
       d += wig(m(cur), x, 3.2);
-      el('path', { d, fill: 'none', stroke: COL.rna, 'stroke-width': 2.2, 'stroke-linecap': 'round', opacity: .95 }, this.gRNA);
+      // the RNA is drawn in the colour of the isoform signature this transcript has committed to so
+      // far, so two polymerases that have made different choices are different colours on screen
+      const sig = sigBy.get(p.id) ?? null;
+      el('path', { d, fill: 'none', stroke: sig?.colour ?? COL.rna, 'stroke-width': 2.2, 'stroke-linecap': 'round', opacity: sig && !sig.resolved ? .8 : .95 }, this.gRNA);
       // lariats released by this polymerase
       for (const a of this.anim.slice(-2)) {
         if (a.pol !== p.id) continue;
         const j = byId.get(a.intron); if (!j) continue;
         const xa = m(j.start), xb = m(j.end), cx = (xa + xb) / 2, k = a.age / 1.5;
         const r = clamp((xb - xa) / 5, 7, 24) * (1 - .45 * k);
-        el('circle', { cx, cy: Y.rna + 64 + k * 74, r, fill: 'none', stroke: COL.intron, 'stroke-width': 2, opacity: (1 - k).toFixed(2) }, this.gRNA);
+        el('circle', { cx, cy: Y.rna + 64 + k * 74, r, fill: 'none', stroke: COL.intron, 'stroke-width': 2, opacity: (1 - k).toFixed(2), class: 'glow' }, this.gRNA);
         el('text', { x: cx, y: Y.rna + 64 + k * 74 - r - 5, class: 'slab', 'text-anchor': 'middle', opacity: (1 - k).toFixed(2) }, this.gRNA).textContent = 'intron lariat';
       }
       // Pol II
       const gp = el('g', {}, this.gPol);
       el('line', { x1: x, y1: Y.dna + 3, x2: x, y2: Y.rna, stroke: COL.pol, 'stroke-width': 1, opacity: .3, 'stroke-dasharray': '3 3' }, gp);
-      el('circle', { cx: x, cy: Y.dna, r: 11, fill: COL.pol, opacity: p.paused ? .5 : 1 }, gp);
+      el('circle', { cx: x, cy: Y.dna, r: 11, fill: COL.pol, opacity: p.paused ? .5 : 1, class: p.paused ? '' : 'glow' }, gp);
       el('text', { x, y: Y.dna + 4, class: 'pollab', 'text-anchor': 'middle' }, gp).textContent = 'Pol';
       if (p.paused) el('text', { x, y: Y.dna - 50, class: 'slab warn2', 'text-anchor': 'middle' }, gp).textContent = 'paused';
       if (p.postTx) el('text', { x, y: Y.rna + 4, class: 'slab warn2', 'text-anchor': 'start' }, gp).textContent = ' post-txn';
+      // the identity chip: this transcript's isoform as far as it has been decided ("?" = still racing)
+      if (sig) this.drawChip(x, sig);
     }
+    this.drawDivergence(m, Y);
     // falling transcripts
     this.gDrop.innerHTML = '';
     for (const dr of this.drops) {
       const b = this.bins.get(dr.key) ?? this.bins.get('other'); if (!b) continue;
       const k = clamp(dr.age / 1.0, 0, 1), xe = m(m.s1);
       const x = xe + (b.x + b.bw / 2 - xe) * k, y = Y.rna + (b.cy + 30 - Y.rna) * k * k;
-      el('rect', { x: x - 9, y: y - 3, width: 18, height: 6, rx: 3, fill: COL.rna, opacity: (1 - .3 * k).toFixed(2) }, this.gDrop);
+      el('rect', { x: x - 9, y: y - 3, width: 18, height: 6, rx: 3, fill: dr.colour ?? COL.rna, opacity: (1 - .3 * k).toFixed(2), class: 'glow' }, this.gDrop);
     }
     // bins + arcs from the expected model
     const n = this.finished();
@@ -790,6 +967,48 @@ export class SpliceTab {
       a.lab.textContent = Number.isFinite(u) ? pct(u) : '';
     }
   }
+  // ---------- live isoform identity on the gene diagram ----------
+  // One chip per nascent transcript: "T2 · −E3 · ?" — the promoter it started from, then one entry
+  // per competing junction group, filled in as that race is decided. Two chips that differ are two
+  // transcripts of the same gene becoming different isoforms.
+  drawChip(x, sig) {
+    const Y = this.Y;
+    const txt = sig.chip;
+    const w = Math.max(34, 6.1 * txt.length + 12);
+    // stagger over three rows so chips do not overlap when several polymerases are close together
+    let row = 0;
+    for (; row < 3; row++) { const last = this.chipRow[row] ?? -1e9; if (x - w / 2 > last) break; }
+    if (row > 2) return;
+    this.chipRow[row] = x + w / 2 + 6;
+    const y = Y.rna - 18 - row * 17;
+    const g = el('g', {}, this.gRNA);
+    el('rect', {
+      x: (x - w / 2).toFixed(1), y: y - 11, width: w.toFixed(1), height: 15, rx: 7,
+      fill: 'rgba(11,13,18,.82)', stroke: sig.colour, 'stroke-width': sig.resolved ? 1.6 : 1,
+      'stroke-dasharray': sig.resolved ? '' : '3 2',
+    }, g);
+    const t = el('text', { x, y: y, class: 'dvchiplab', 'text-anchor': 'middle', fill: sig.colour }, g);
+    t.textContent = txt;
+    el('title', {}, t).textContent = sig.resolved
+      ? 'this transcript has made every choice it can: this is the isoform it will be'
+      : '“?” = this transcript has not yet resolved that competing junction — the race is still running on this molecule';
+    el('line', { x1: x, y1: y + 4, x2: x, y2: Y.rna - 3, stroke: sig.colour, 'stroke-width': 1, opacity: .45 }, g);
+  }
+  // A divergence moment: two live transcripts resolved the SAME junction group differently.
+  drawDivergence(m, Y) {
+    for (const d of this.divPulse) {
+      const k = clamp(d.age / 2.6, 0, 1), x = m(d.at);
+      const g = el('g', { opacity: (1 - k * k).toFixed(2) }, this.gRNA);
+      el('circle', { cx: x, cy: Y.dna + 13, r: (8 + 26 * k).toFixed(1), fill: 'none', stroke: COL.alt, 'stroke-width': (2.4 * (1 - k)).toFixed(2) }, g);
+      el('circle', { cx: x, cy: Y.dna + 13, r: 5, fill: COL.alt, class: 'glow' }, g);
+      const y = Y.dna + 92;
+      el('line', { x1: x, y1: Y.dna + 18, x2: x, y2: y - 13, stroke: COL.alt, 'stroke-width': 1.2, 'stroke-dasharray': '3 2' }, g);
+      const txt = `same site, different choice: ${d.a} vs ${d.b}`;
+      const w = 6.4 * txt.length + 16;
+      el('rect', { x: (x - w / 2).toFixed(1), y: y - 13, width: w.toFixed(1), height: 18, rx: 9, fill: 'rgba(255,181,71,.14)', stroke: COL.alt, 'stroke-width': 1.2 }, g);
+      el('text', { x, y: y, class: 'dvpulse', 'text-anchor': 'middle', fill: COL.alt }, g).textContent = txt;
+    }
+  }
   loop() {
     this.raf = requestAnimationFrame((now) => {
       const dt = Math.min((now - this.last) / 1000, 0.05); this.last = now;
@@ -799,12 +1018,66 @@ export class SpliceTab {
         if (this.view === 'struct3d') this.v3?.update(dt, this.sim, this.J);
         else this.frame(dt);
         this.uiAcc = (this.uiAcc ?? 0) + dt;
-        if (this.uiAcc > 0.4) { this.uiAcc = 0; this.renderPanel(); }
+        if (this.uiAcc > 0.4) { this.uiAcc = 0; this.renderPanel(); this.renderPace(); this.renderDivLive(); }
       }
       this.loop();
     });
   }
   resize() { this.v3?.resize(); }
+
+  // ---------- animation pace (view only: no printed number depends on it) ----------
+  // Pol II really takes 4.6 min to cross PPP1R15A and 5.3 h to cross ESR1; at one fixed
+  // "× real time" one of those is a blur and the other is frozen. pace.js maps the real rate
+  // onto a watchable tempo per gene, keeping (a compressed version of) the slow<->fast ratio.
+  solvePace(mul = this.mul, rate = null) {
+    const m = this.map, ek = this.role.elong;
+    const nt = m ? m.s1 - m.s0 : 1;
+    const r = rate ?? (ek ? this.P[ek] : 25);
+    // the two things that can leave the gene looking dead: no new polymerase arrives, and a
+    // promoter-proximal pause nobody escapes
+    const init = this.P.initRate ?? 0.02, pe = this.P.pauseEscape ?? 0.002;
+    const gapSim = Math.max(init > 0 ? 1 / init : 0, (this.P.pauseProb ?? 0) > 0.02 && pe > 0 ? 1 / pe : 0);
+    // the x axis is log-compressed, so the bead dashes through the exons and crawls through a long
+    // intron: the blur ceiling has to be set by the FASTEST stretch, not by the average
+    return pace.solve({ nt, rate: r, mul, refNt: 20000, refRate: (ek ? this.P0?.[ek] : null) ?? r, gapSim, fastRate: r * burstOf(m), blurSoft: true });
+  }
+  renderPace() {
+    let n = $('spaceNote');
+    if (!n) {
+      n = document.createElement('div');
+      n.id = 'spaceNote'; n.className = 'pacenote';
+      const host = $('sctrls') ?? $('sbins');
+      if (!host) return;                       // panel not mounted yet; try again next frame
+      host.before(n);
+    }
+    const p = this.pace = this.solvePace();
+    const m = this.map;
+    if (!m || !(p.ts > 0)) { n.textContent = ''; return; }
+    const ek = this.role.elong, d = ek ? this.PARAMS[ek] : null;
+    const ratio = d ? pace.ratioNote('Pol II elongation', this.solvePace(this.mul, d.min), this.solvePace(this.mul, d.max)) : '';
+    n.innerHTML = `<b>⏱ ${esc(pace.label(p.ts))}</b>
+      <span>Pol II crosses ${esc(this.gene?.gene ?? 'this gene')} (${(m.s1 - m.s0).toLocaleString()} nt) in
+      <b>${fmt(p.crossWall)} s</b> of your time — ${esc(dur(p.crossSim))} in the cell at ${fmt(ek ? this.P[ek] : 25, 0)} nt/s.</span>
+      <span>${esc(ratio)}${p.limit ? ` · here the picture is held at the <b>${p.limit}</b> watchable pace, so the on-screen difference is smaller than the real one` : ''}</span>
+      <span class="fine">Only the wall-clock tempo is compressed. Every percentage on this page is the exact model at the real rates.</span>`;
+  }
+
+  // ---------- pacing diagnostics (read-only) ----------
+  // Used by scratchpad/pace/measure.mjs to MEASURE the Pol II bead's px/s and traversal time.
+  // Reports positions in CSS pixels; changes nothing.
+  paceInfo() {
+    const m = this.map, g = this.gene;
+    const o = { gene: g?.gene ?? null, nt: m ? m.s1 - m.s0 : 0, timeScale: this.pace?.ts, mul: this.mul, anim: this.animRange, view: this.view };
+    const ctm = this.svg?.getScreenCTM?.();
+    if (m && ctm) {
+      const px = (x) => ctm.a * x + ctm.e;
+      o.lane = { x0: px(m(m.s0)), x1: px(m(m.s1)) };
+      const pols = (typeof this.sim?.view === 'function' ? this.sim.view() : this.sim?.pols) ?? [];
+      o.marks = pols.map(p => ({ id: p.id, px: px(m(p.pos ?? 0)), nt: p.pos ?? 0, paused: !!p.paused }));
+    }
+    o.pace = this.pace ?? null;
+    return o;
+  }
 }
 
 // ---------------------------------------------------------------- placeholder (clearly labelled)

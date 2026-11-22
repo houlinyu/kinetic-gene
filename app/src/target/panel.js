@@ -451,9 +451,10 @@ export function mountTarget(hooks = {}) {
         <b>${fmtWin(c.oncoGeo < 1 ? 1 / c.oncoGeo : c.oncoGeo)}</b>${capNote(c.oncoGeo < 1 ? 1 / c.oncoGeo : c.oncoGeo)}
         while the reference set (n=${c.nRef}) ${dirR} <b>${fmtWin(c.refGeo < 1 ? 1 / c.refGeo : c.refGeo)}</b>.
         <span class="mute">n = ${c.onco.length} of ${c.nOncoListed} oncogenes listed in <code>targets.json</code> have 5′ leader data${c.onco.length < c.nOncoListed ? ` — the other ${c.nOncoListed - c.onco.length} are not scored at all` : ''}.</span></div>
-      ${Number.isFinite(lenWin) ? `<div class="wlen"><b>Most of this separation is leader length / structure, not oncogene biology.</b>
+      ${Number.isFinite(lenWin) ? `<div class="wlen"><b>${lenWin >= 0.95 ? 'Most of this separation is leader length / structure, not oncogene biology.' : 'There is no favourable window here.'}</b>
         Against <b>length-matched non-oncogene controls</b> from the same data (nearest leader length, n=${c.matched.length}) the window is only <b>${fmtWin(lenWin)}</b>${capNote(lenWin)}
-        — the independent audit measured ~4.4× at full dose. The oncogenes here are ${Math.min(...lens)}–${Math.max(...lens)} nt
+        ${st.leverId === 'eif4a' && st.dose >= 0.99 ? ' — an independent audit measured ~4.4× for eIF4A at full dose.' : ''}
+        ${lenWin < 0.95 ? '<b>This is below 1, i.e. the length-matched controls are hit <i>harder</i> than the oncogenes — the window is inverted, not favourable.</b>' : ''} The oncogenes here are ${Math.min(...lens)}–${Math.max(...lens)} nt
         and the reference set ${refLens.length ? `${Math.min(...refLens)}–${Math.max(...refLens)} nt` : 'much shorter'}, so the two sets differ in length as much as in biology.
         ${c.corr ? `Across all ${c.corr.n} leaders, r(log₁₀ response, most-stable-hairpin ΔG) = <b>${f2(c.corr.r)}</b>.` : ''}
         ${c.twin && c.ext ? `The single most-affected gene (${esc(c.ext.gene)}, ${c.ext.iso.len} nt) is matched by a non-oncogene leader of nearly the same length —
@@ -554,7 +555,6 @@ export function mountTarget(hooks = {}) {
     el.querySelector('#tgtAll')?.addEventListener('change', (e) => { st.allGenes = e.target.checked; render(); });
     el.querySelector('#tgtSec')?.addEventListener('change', (e) => { st.secondary = e.target.checked; render(); });
     el.querySelectorAll('.tgt-levers li[data-lever]').forEach(li => li.addEventListener('click', () => {
-      if (li.classList.contains('off')) return;
       st.leverId = li.dataset.lever; render();
       // one column: the chart is above the lever list, so bring the new answer back into view
       if (innerWidth <= 1100) el.querySelector('.tgt-win, .tgt-chartbox')?.scrollIntoView({ block: 'start', behavior: 'smooth' });

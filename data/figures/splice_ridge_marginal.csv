@@ -1,0 +1,36 @@
+name,label,marginal_spearman,within_gene_spearman
+is_longest,"Is the gene's longest transcript (structural reference)",0.210917,0.243542
+log_tx_len,"Transcript length (log10 nt)",0.0839857,0.178937
+log_mean_exon,"Mean exon length (log10 nt)",0.143507,0.178698
+ss_use_mean,"Mean predicted site usage of the junctions used (Pangolin)",0.0650517,0.144588
+alt_first_exon,"Alternative first exon",-0.135792,-0.144059
+ss_p_mean,"Mean splice-site strength of the junctions used (Pangolin)",0.0539351,0.141102
+orf_len_log,"ORF length (log10 nt)",0.0617498,0.120552
+ss_use_min,"Weakest predicted site usage of the junctions used (Pangolin)",0.13169,0.117661
+ss_p_min,"Weakest splice site used (Pangolin site probability)",0.14055,0.117567
+alt_3ss,"Uses an alternative 3' splice site",-0.171064,-0.11727
+alt_5ss,"Uses an alternative 5' splice site",-0.170221,-0.111171
+tes_pas_canonical,"Canonical polyA signal at the 3' end",0.0683912,0.0840526
+gc,"GC content",0.0151066,-0.0712765
+cassette_skip,"Skips a cassette exon of the reference transcript",-0.0974291,-0.0651191
+nmd_ptc,"Premature stop codon (NMD candidate)",-0.066202,-0.049443
+n_exons,"Number of exons",-0.0312607,0.0404964
+frac_share_tes,"Fraction of the gene's transcripts sharing this 3' end",0.0652614,0.0404315
+utr5_len_log,"5' UTR length (log10 nt)",0.00189294,0.040287
+mes_acc_min,"Weakest acceptor used (MaxEntScan 3' bits)",0.0231877,-0.0319082
+log_mean_intron,"Mean intron length (log10 nt)",-0.0768045,-0.0294219
+n_iso_locus_log,"Number of annotated isoforms of the gene (log10)",-0.324259,0.0288894
+mes_donor_mean,"Mean donor strength of the junctions used (MaxEntScan 5')",0.0353979,0.0286424
+is_dom_tss,"Starts at the gene's dominant TSS",0.0556208,0.0253768
+intron_retention,"Retains an intron",0.00754333,0.021935
+log_min_intron,"Shortest intron (log10 nt)",0.00364396,-0.0171026
+tss_cpg_island,"TSS in a CpG island",-0.0834589,0.0129394
+log_max_intron,"Longest intron (log10 nt)",-0.0868108,-0.00858322
+n_uatg,"Upstream AUGs in the 5' UTR",-0.0178431,0.00775074
+mes_acc_mean,"Mean acceptor strength of the junctions used (MaxEntScan 3')",0.0186742,0.00578352
+log_dist_dom_tss,"Distance from the gene's dominant TSS (log10 nt)",-0.0157381,0.00508754
+likely_5p_fragment,"Flagged as a likely 5' fragment",-0.00417133,-0.0049334
+tss_tata,"TATA box at the TSS",0.0351692,0.00396747
+mes_donor_min,"Weakest donor used (MaxEntScan 5' bits)",0.0511029,0.00366675
+tss_gc,"GC content around the TSS",-0.0487027,0.00230683
+frac_share_tss,"Fraction of the gene's transcripts sharing this TSS",-0.0260634,0.0017197

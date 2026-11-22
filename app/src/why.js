@@ -28,7 +28,7 @@ export function contribSVG(ridge, k = 6) {
 
 // The MRL models (ridge here, Optimus 5′ for comparison) were fitted on 25–100 nt MPRA reporter
 // UTRs. A mean ribosome load is a count of ribosomes, so a negative value is not a small number —
-// it is out of the model's range. 18 of 82 isoforms in this data set predict below 0.
+// it is out of the model's range. 18 of the 82 ridge-fitted isoforms (of 113 total) predict below 0.
 const MRL_TRAIN = [25, 100];
 const MRL_OOR = 'the ridge / Optimus 5′ MRL models were fitted on 25–100 nt reporter UTRs and extrapolate badly to long endogenous leaders; a mean ribosome load cannot be negative, so no number is shown';
 function mrlCell(iso, r) {
@@ -55,7 +55,7 @@ export function whyHTML(isoA, isoB, nameA, nameB) {
     ${one('A', isoA, nameA)}${one('B', isoB, nameB)}
     ${any ? `<div class="fkey"><span><i style="background:${UP}"></i>raises predicted ribosome load</span><span><i style="background:${DOWN}"></i>lowers it</span></div>
       <div class="oornote">Trained on ${MRL_TRAIN[0]}–${MRL_TRAIN[1]} nt MPRA reporter UTRs. Endogenous leaders are much longer, and the fit extrapolates badly —
-        18 of 82 isoforms here predict a <b>negative</b> ribosome load, which is impossible; those are shown as “out of model range”.</div>` : ''}`;
+        18 of the 82 ridge-fitted isoforms here (113 in the picker; 31 were added after the fit) predict a <b>negative</b> ribosome load, which is impossible; those are shown as “out of model range”.</div>` : ''}`;
 }
 
 // ---- global fit card ----

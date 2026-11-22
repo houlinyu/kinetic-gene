@@ -7,10 +7,10 @@ const lamAt = (i) => LMIN * Math.pow(LMAX / LMIN, i / (NX - 1));
 const betaAt = (j) => BMAX * j / (NY - 1);
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
-// Robustness audit (n = 3000 Latin-hypercube draws over the declared range of all 16 UI-exposed
+// Robustness audit (n = 3000 Latin-hypercube draws over the declared range of the 16 then-exposed
 // parameters, run outside the app): how often each claim survives re-sampling. Shown so that
 // "5 / 5" is not read as "robust".
-const ROBUST = { atf4: 3.5, all: 0.70, n: 3000, nparam: 16 };
+const ROBUST = { atf4: 3.5, all: 0.70, n: 3000, nparam: 16, nparamNow: 19 };
 
 // Per-row display overrides where the model agrees with a paper for the wrong reason. The model's
 // numbers are not changed — only what the row is allowed to claim.
@@ -74,7 +74,7 @@ export class Scorecard {
       `<div class="schead ${all ? 'ok' : 'bad'}"><b>${ok} of ${tested}</b> direction checks reproduced at our chosen parameter point${
         failed.length ? ` · <span class="scfail">${failed.map(f => esc(f.title.split(/[:(]/)[0].trim())).join('; ')} fail${failed.length > 1 ? '' : 's'}${failed.some(f => f.status === 'missing') ? ' (missing mechanism)' : ''}</span>` : ''}</div>
        <div class="scrob">Not a robustness claim. Re-sampling all ${ROBUST.nparam} UI-exposed parameters over their own declared ranges
-         (n = ${ROBUST.n.toLocaleString()}): the ATF4 induction holds in <b>${ROBUST.atf4}%</b> of draws, and <b>all five findings at once in ${ROBUST.all}%</b>.</div>`;
+         (n = ${ROBUST.n.toLocaleString()}): the ATF4 induction holds in <b>${ROBUST.atf4}%</b> of draws, and <b>all five mechanism findings at once in ${ROBUST.all}%</b> (CHOP is the sixth check and is a known failure, so it is not in that five). The audit sampled ${ROBUST.nparam} parameters; ${ROBUST.nparamNow} are exposed now, so ${ROBUST.nparamNow - ROBUST.nparam} added since are untested.</div>`;
     this.root.querySelector('#scList').innerHTML = s.res.map(f0 => {
       // display-only correction: never let a row claim more than the model actually supports
       const fix = ROW_FIX[f0.id];

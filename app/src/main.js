@@ -10,6 +10,7 @@ import './style.css';
 import { Lane, CDS_STUB } from './sim.js';
 import { LaneView, COLORS } from './world.js';
 import { PARAMS, SOURCES, values } from './params.js';
+import * as pace from './pace.js';
 import { expected } from './analytic.js';
 import { Scorecard } from './scorecard.js';
 import { FoldView } from './folded.js';
@@ -70,7 +71,14 @@ composer.addPass(new OutputPass());
 // ---------- state ----------
 const P = values();
 let data, genes = [], gene, laneA, laneB, viewA, viewB, paused = false;
-const sim = { speed: 3 };
+// ANIMATION PACE. `sim.speed` is now RELATIVE: 1 = the watchable pace solved by pace.js, which
+// maps the model's real nt/s onto a wall-clock tempo that is neither frozen nor a blur at any
+// setting. The physical parameters keep their units and still produce every printed number;
+// only the number of model seconds per second of your time changes, and that factor is printed
+// on the page (#paceNote).
+const sim = { speed: 1 };
+const ANIM = { min: 0.25, max: 4, def: 1 };
+let paceT = { ts: 1, crossSim: 1, crossWall: 1 };
 const LANE_Y = [1.0, -2.6];
 let idxA = 0, idxB = 1;
 const target = { A: 0, B: 0, ratio: 1, stress: 0 };
@@ -518,7 +526,10 @@ $('sideToggle').onclick = () => { document.body.classList.toggle('side-open'); o
 // ---------- parameter GUI (Advanced, closed) ----------
 const gui = new GUI({ title: 'Advanced: all parameters', container: $('guiHost') });
 gui.close();
-gui.add(sim, 'speed', 0.25, 10, 0.25).name('animation speed ×');
+// Relative to the watchable pace, not to real time: 1 = the pace pace.js solved for this leader
+// and these rates. The absolute compression it works out to is printed live in #paceNote, and
+// pace.js clamps the result so neither end of this slider can freeze or blur the picture.
+gui.add(sim, 'speed', ANIM.min, ANIM.max, 0.25).name('animation speed × watchable pace');
 for (const k of Object.keys(PARAMS)) {
   const d = PARAMS[k];
   gui.add(P, k, d.min, d.max, d.step).name(`${d.label}${d.cite ? '' : ' (assumed)'}`).onChange(() => onParams(k));
@@ -613,13 +624,52 @@ addEventListener('keydown', e => {
   if (['Digit1', 'Digit2', 'Digit3'].includes(e.code)) setView(VM[+e.code.slice(5) - 1]);
 });
 
+// ---------- animation pace (view only: it never touches a printed number) ----------
+// The lanes are drawn to one shared scale (world.js: WIDTH / (maxLen + CDS_STUB)), so both
+// ribosomes move at the same px/s. One traversal of that drawn width is the thing we keep inside
+// the watchable window.
+function paceSolve(mul = sim.speed, rate = P.scanSpeed) {
+  const nt = laneA ? Math.max(laneA.iso.len, laneB ? laneB.iso.len : 0) + CDS_STUB : 1;
+  // how long the lane stays empty between two 43S loadings (hairpin blocking excluded: it is
+  // lane-specific, and we must not speed the whole clock up because one lane is gated)
+  const load = Math.max(1e-6, P.loadRate * Math.pow(Math.max(P.tc, 1e-6), P.loadTCexp ?? 1));
+  return pace.solve({
+    nt, rate, mul,
+    refNt: 340,                        // a ~250 nt leader + the 90 nt CDS stub: a typical case
+    refRate: PARAMS.scanSpeed.value,   // the default scanning speed lands on PACE.MID
+    gapSim: 1 / load,
+    fastRate: P.elongSpeed,            // elongating ribosomes (uORF / CDS) must not blur either
+  });
+}
+let paceEl = null;
+function renderPaceNote() {
+  if (!paceEl) {
+    paceEl = document.createElement('div');
+    paceEl.id = 'paceNote'; paceEl.className = 'pacenote';
+    $('cards').before(paceEl);
+  }
+  const p = paceT;
+  if (!laneA || !(p.ts > 0)) { paceEl.textContent = ''; return; }
+  const lo = paceSolve(sim.speed, PARAMS.scanSpeed.min), hi = paceSolve(sim.speed, PARAMS.scanSpeed.max);
+  const mins = Math.floor(p.crossSim / 60), secs = Math.round(p.crossSim % 60);
+  paceEl.innerHTML = `<b>⏱ ${esc(pace.label(p.ts))}</b>
+    <span>A ribosome crosses this leader in <b>${fmt(p.crossWall)} s</b> of your time —
+    ${p.crossSim >= 60 ? `${mins} min ${secs} s` : `${fmt(p.crossSim)} s`} in the cell
+    (${Math.round(p.crossSim * P.scanSpeed)} nt at ${fmt(P.scanSpeed, 0)} nt/s).</span>
+    <span>${esc(pace.ratioNote('Scanning speed', lo, hi))}${p.limit ? ` · at this setting the picture is held at the <b>${p.limit}</b> watchable pace, so the on-screen difference here is smaller than the real one` : ''}</span>
+    <span class="fine">Only the wall-clock tempo is compressed. Every number on this page is the exact model at the real rates.</span>`;
+}
+
 // ---------- loop ----------
 let last = performance.now(), uiClock = 0;
 const fogCol = new THREE.Color();
 function tick(now) {
   const dt = Math.min((now - last) / 1000, 0.05); last = now;
+  if (laneA) paceT = paceSolve();
   if (laneA && !paused) {
-    const simDt = dt * sim.speed, sub = Math.ceil(simDt / 0.02);
+    // sub-stepping keeps the stochastic model accurate however much wall time is compressed;
+    // capped so a 100x+ compression cannot cost a frame (0.02 s -> at most 0.06 s per sub-step)
+    const simDt = dt * paceT.ts, sub = Math.min(240, Math.max(1, Math.ceil(simDt / 0.02)));
     for (let i = 0; i < sub; i++) { laneA.step(simDt / sub, P); laneB.step(simDt / sub, P); }
     viewA.update(dt); viewB.update(dt);
   }
@@ -634,11 +684,31 @@ function tick(now) {
   scene.background.copy(BG_CALM).lerp(BG_STRESS, shown.stress);
   scene.fog.color.copy(fogCol.copy(BG_CALM).lerp(BG_STRESS, shown.stress));
   uiClock += dt;
-  if (uiClock > 0.06 && laneA) { uiClock = 0; renderNumbers(); }
+  if (uiClock > 0.06 && laneA) { uiClock = 0; renderNumbers(); renderPaceNote(); }
   controls.update();
   composer.render(); labels.render(scene, camera);
 }
 renderer.setAnimationLoop(tick);
+
+// ---------- pacing diagnostics (read-only) ----------
+// Used by scratchpad/pace/measure.mjs to MEASURE on-screen px/s and traversal time instead of
+// judging it by eye. Reports where the markers are in CSS pixels; changes nothing.
+const _pv = new THREE.Vector3();
+const toPx = (grp, x) => {
+  _pv.set(x, 0, 0).applyMatrix4(grp.matrixWorld).project(camera);
+  return (_pv.x + 1) / 2 * renderer.domElement.clientWidth;
+};
+window.__kgPace = () => {
+  const o = { page, canvasW: renderer.domElement.clientWidth, timeScale: paceT?.ts, mul: sim.speed, anim: ANIM, paused };
+  if (laneA && viewA?.X && viewMode === 'linear') {
+    const L = laneA.iso.len;
+    o.lane = { iso: laneA.iso.name, utrLen: L, spanNt: L + CDS_STUB, x0: toPx(viewA.group, viewA.X(0)), x1: toPx(viewA.group, viewA.X(L + CDS_STUB)) };
+    o.marks = laneA.ribos.map(r => ({ id: r.id, px: toPx(viewA.group, viewA.X(r.pos)), nt: r.pos, mode: r.mode }));
+    o.pace = paceT;
+  }
+  if (spliceTab?.paceInfo) o.splice = spliceTab.paceInfo();
+  return o;
+};
 
 // ---------- data ----------
 // A data failure must not blank the page: it renders a visible error and still mounts the tabs.

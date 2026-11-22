@@ -1,0 +1,16 @@
+introns 733878
+  offset (0, 0): GT..AG 0.988 on 737
+  offset (0, 1): GT..AG 0.000 on 737
+  offset (1, 0): GT..AG 0.000 on 737
+  offset (1, 1): GT..AG 0.000 on 737
+using offset (0, 0) (GT..AG 0.988)
+  MaxEntScan validation: score5=10.858313101356437 (expect 10.858313101356437); score3=2.8867730651152104 (expect 2.8867730651152104)
+  0/733878
+  100000/733878
+  200000/733878
+  300000/733878
+  400000/733878
+  500000/733878
+  600000/733878
+  700000/733878
+wrote /home/unix/yuhoulin/kinetic-gene/pipeline/splice_ridge/work/maxent.tsv unscorable windows: 0

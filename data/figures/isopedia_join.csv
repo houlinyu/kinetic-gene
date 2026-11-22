@@ -1,0 +1,58 @@
+gene,locus_id,app_id,app_base,app_name,isoform_uid,join,in_v49,n_introns
+ATF4,ENSG00000128272.20,ENST00000674920.3,ENST00000674920,ATF4-206,a08fc3da7b09e19bcb9d,ENST present in GENCODE v49 (+/-10 bp flank merge),True,2
+ATF4,ENSG00000128272.20,ENST00000337304.3,ENST00000337304,ATF4-201,f4373eafba24c7e0ea93,ENST present in GENCODE v49,True,1
+ATF4,ENSG00000128272.20,ENST00000921525.2,ENST00000921525,ATF4-213,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,2
+ATF4,ENSG00000128272.20,ENST00000921529.1,ENST00000921529,ATF4-217,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,2
+ATF4,ENSG00000128272.20,ENST00000921528.2,ENST00000921528,ATF4-216,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,3
+ATF4,ENSG00000128272.20,ENST00000921527.2,ENST00000921527,ATF4-215,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,4
+ATF5,ENSG00000169136.14,ENST00000423777.7,ENST00000423777,ATF5-201,050b60c128510601f49b,ENST present in GENCODE v49,True,2
+ATF5,ENSG00000169136.14,ENST00001101438.1,ENST00001101438,ATF5-215,,"Ensembl-116-only id, matched by intron chain from app exon coordinates; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold)",False,1
+ATF5,ENSG00000169136.14,ENST00000858035.2,ENST00000858035,ATF5-209,beae445c7fad00c8c4c2,ENST present in GENCODE v49,True,2
+ATF5,ENSG00000169136.14,ENST00000858034.2,ENST00000858034,ATF5-208,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,4
+ATF5,ENSG00000169136.14,ENST00000858036.2,ENST00000858036,ATF5-210,a74d6e9377a0d5f75999,ENST present in GENCODE v49,True,2
+ATF5,ENSG00000169136.14,ENST00000600336.2,ENST00000600336,ATF5-205,7595ca8f9f6be86542dd,ENST present in GENCODE v49,True,1
+BACE1,ENSG00000186318.19,ENST00000313005.11,ENST00000313005,BACE1-201,b793814bc641beddc69f,ENST present in GENCODE v49,True,8
+BACE1,ENSG00000186318.19,ENST00000510630.6,ENST00000510630,BACE1-206,c266d56e6dd7f4c79179,ENST present in GENCODE v49,True,7
+BACE1,ENSG00000186318.19,ENST00000680971.1,ENST00000680971,BACE1-216,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,7
+BACE1,ENSG00000186318.19,ENST00000392937.11,ENST00000392937,BACE1-202,ac68246ab6f262b42de9,ENST present in GENCODE v49,True,7
+BACE1,ENSG00000186318.19,ENST00000510915.6,ENST00000510915,BACE1-207,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,6
+BACE1,ENSG00000186318.19,ENST00000896512.2,ENST00000896512,BACE1-219,d6c4c4a5f69251f888fe,ENST present in GENCODE v49,True,7
+CDKN2A,ENSG00000147889.18,ENST00000304494.10,ENST00000304494,p16INK4a (exon 1alpha),8a24ab3ee6f6943f4ae2,ENST present in GENCODE v49,True,2
+CDKN2A,ENSG00000147889.18,ENST00000579755.2,ENST00000579755,p14ARF (exon 1beta),f2deffd652486255b8ab,ENST present in GENCODE v49,True,2
+DDIT3,ENSG00000175197.13,ENST00000346473.8,ENST00000346473,DDIT3-201,7276aeb16fbb15432cbd,ENST present in GENCODE v49,True,3
+DDIT3,ENSG00000175197.13,ENST00001009926.1,ENST00001009926,DDIT3-212,,"Ensembl-116-only id, matched by intron chain from app exon coordinates; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold)",False,2
+DDIT3,ENSG00000175197.13,ENST00001105324.1,ENST00001105324,DDIT3-215,,"Ensembl-116-only id, matched by intron chain from app exon coordinates; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold)",False,3
+DDIT3,ENSG00000175197.13,ENST00000999959.1,ENST00000999959,DDIT3-211,,"Ensembl-116-only id, matched by intron chain from app exon coordinates; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold)",False,1
+DDIT3,ENSG00000175197.13,ENST00001105326.1,ENST00001105326,DDIT3-217,,"Ensembl-116-only id, matched by intron chain from app exon coordinates; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold)",False,3
+DDIT3,ENSG00000175197.13,ENST00001105327.1,ENST00001105327,DDIT3-218,,"Ensembl-116-only id, matched by intron chain from app exon coordinates; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold)",False,3
+ERBB2,ENSG00000141736.15,ENST00000269571.10,ENST00000269571,ERBB2-201,e3e0d200f416a68ffbec,ENST present in GENCODE v49 (+/-10 bp flank merge),True,26
+ERBB2,ENSG00000141736.15,ENST00000584014.6,ENST00000584014,ERBB2-214,8300620966a76e40c9d8,ENST present in GENCODE v49,True,17
+ERBB2,ENSG00000141736.15,ENST00000578709.5,ENST00000578709,ERBB2-207,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,2
+ERBB2,ENSG00000141736.15,ENST00000863102.2,ENST00000863102,ERBB2-228,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,25
+ERBB2,ENSG00000141736.15,ENST00000584601.6,ENST00000584601,ERBB2-217,4f3b6740a59136a796a8,ENST present in GENCODE v49,True,30
+ERBB2,ENSG00000141736.15,ENST00000578199.5,ENST00000578199,ERBB2-203,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,17
+MAPT,ENSG00000186868.19,ENST00000334239.13,ENST00000334239,0N3R tau (fetal),7ecf03c254908362201c,ENST present in GENCODE v49,True,8
+MAPT,ENSG00000186868.19,ENST00000446361.8,ENST00000446361,0N4R tau,a48e64c347e66f6908b6,ENST present in GENCODE v49,True,9
+MAPT,ENSG00000186868.19,ENST00000420682.8,ENST00000420682,1N4R tau,67563ebd05384fcb2ccd,ENST present in GENCODE v49,True,10
+MAPT,ENSG00000186868.19,ENST00000351559.11,ENST00000351559,2N4R tau,6fcf66d46c7134defdc6,ENST present in GENCODE v49,True,11
+MDM2,ENSG00000135679.28,ENST00000258149.11,ENST00000258149,MDM2-202,f0555bf389802234a9bd,ENST present in GENCODE v49,True,10
+MDM2,ENSG00000135679.28,ENST00000393415.7,ENST00000393415,MDM2-211,db3fa0a2696ee3ffa4db,ENST present in GENCODE v49,True,10
+MDM2,ENSG00000135679.28,ENST00000539479.7,ENST00000539479,MDM2-224,f4a2d05de77486f61e35,ENST present in GENCODE v49,True,10
+MDM2,ENSG00000135679.28,ENST00000393416.8,ENST00000393416,MDM2-212,9194e13f8b74afd71902,ENST present in GENCODE v49,True,11
+MDM2,ENSG00000135679.28,ENST00001114783.1,ENST00001114783,MDM2-243,,"Ensembl-116-only id, matched by intron chain from app exon coordinates; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold)",False,1
+MDM2,ENSG00000135679.28,ENST00000393412.8,ENST00000393412,MDM2-209,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,3
+PPP1R15A,ENSG00000087074.10,ENST00000200453.6,ENST00000200453,PPP1R15A-201,9e10512401256532b8e8,ENST present in GENCODE v49 (+/-10 bp flank merge),True,2
+PPP1R15A,ENSG00000087074.10,ENST00000704027.2,ENST00000704027,PPP1R15A-205,7cf80c48b464c25a9493,ENST present in GENCODE v49,True,1
+PPP1R15A,ENSG00000087074.10,ENST00000955400.2,ENST00000955400,PPP1R15A-208,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,2
+PPP1R15A,ENSG00000087074.10,ENST00000859687.2,ENST00000859687,PPP1R15A-206,9e10512401256532b8e8,ENST present in GENCODE v49,True,2
+PPP1R15A,ENSG00000087074.10,ENST00000600406.2,ENST00000600406,PPP1R15A-202,58fc36e418f8b10298ca,ENST present in GENCODE v49,True,1
+TP53,ENSG00000141510.20,ENST00000269305.9,ENST00000269305,TP53-201,f9d6cc38187bce40a1aa,ENST present in GENCODE v49,True,10
+TP53,ENSG00000141510.20,ENST00000610623.4,ENST00000610623,TP53-221,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,7
+TP53,ENSG00000141510.20,ENST00000714356.1,ENST00000714356,TP53-228,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,9
+TP53,ENSG00000141510.20,ENST00000923569.1,ENST00000923569,TP53-238,a5fc72a5cea1d495fc0c,ENST present in GENCODE v49,True,9
+TP53,ENSG00000141510.20,ENST00000923566.1,ENST00000923566,TP53-235,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,10
+TP53,ENSG00000141510.20,ENST00000905353.1,ENST00000905353,TP53-234,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,10
+TP53,ENSG00000141510.20,ENST00000504937.5,ENST00000504937,delta133p53alpha,8a358d9d156483cfd7af,ENST present in GENCODE v49,True,6
+TP53,ENSG00000141510.20,ENST00000509690.6,ENST00000509690,delta133p53,,ENST present in GENCODE v49; no catalog isoform with this intron chain -> pooled into 'other' (below the 5% catalog threshold),True,7
+TP63,ENSG00000073282.14,ENST00000264731.8,ENST00000264731,TAp63alpha,c56f9cefb75c1ae297b3,ENST present in GENCODE v49,True,13
+TP63,ENSG00000073282.14,ENST00000354600.10,ENST00000354600,deltaNp63alpha,9918e7a2ee49f8b9b5dd,ENST present in GENCODE v49,True,11

@@ -102,7 +102,7 @@
    "model": "splice",
    "param_note": "The targeted site's own strength score in splice_data.json (donor.score / acceptor.score), not a global knob: down at the masked site, which lets the competing site win.",
    "agent": "nusinersen (approved, SMA - proof of concept); MDM4 exon-6 ASO (preclinical oncology)",
-   "mechanism": "A steric-block oligonucleotide base-pairs over a splice site or regulatory element so the spliceosome cannot use it; the competing site wins instead. Nusinersen does this on SMN2 to include exon 7; an MDM4 exon-6 ASO does the reverse (forces skipping) to destabilise MDM4 mRNA.",
+   "mechanism": "A steric-block oligonucleotide base-pairs over a splice site or regulatory element so the spliceosome cannot use it; the competing site wins instead. Nusinersen binds SMN2 mRNA and promotes exon 7 inclusion (Wood 2017 does not state its binding site), so it is NOT a splice-site mask: our site_score-down mapping represents only the skipping-direction ASO, such as the MDM4 exon-6 ASO that forces skipping to destabilise MDM4 mRNA.",
    "status": "nusinersen: approved (December 2016) for spinal muscular atrophy. MDM4 exon-6 ASO: preclinical - melanoma cell lines and patient-derived xenografts, plus a DLBCL PDX.",
    "quote": "steric block ASO that binds the SMN2 messenger RNA and promotes exon 7 inclusion",
    "quote_source": "abstract",
@@ -590,7 +590,7 @@
     }
    ],
    "conflicts": [
-    "Method conflict, stated in the literature itself: Singh 2021 says its ribosome-footprinting result 'contrast[s] with a recent study that relied on an older method, polysome fractionation' (Rubio 2014, which implicated redox-related genes). The gene lists from different eIF4A studies do not fully agree.",
+    "Method conflict, stated in the literature itself: Singh 2021 says its ribosome-footprinting result 'contrast[s] with a recent study that relied on an older method, polysome fractionation' (Chan et al. 2019 Nat Commun 10:5151, PMID 31723131). The gene lists from different eIF4A studies do not fully agree.",
     "Mechanism conflict: a structure-unwinding model (Wolfe/Rubio/Singh) vs a sequence-specific clamp model (Iwasaki). Our `helicase` knob implements the first; the second predicts that a polypurine tract, not a hairpin, marks the sensitive transcript, and predicts NEW upstream initiation events rather than slower scanning."
    ],
    "what_the_app_may_claim": "That mRNAs whose leaders our pipeline measures as long, structured, G-quadruplex-bearing lose more predicted output when `helicase` is lowered - and that this matches the feature set reported for eIF4A-dependent transcripts in the three footprinting/profiling studies above. It may NOT claim that a given gene will respond to a rocaglate in a patient, nor that our structure score is the mechanism Iwasaki 2016 describes."

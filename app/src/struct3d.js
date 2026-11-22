@@ -493,7 +493,7 @@ export class Struct3DView extends FoldView {
 export function structNoteHTML() {
   const K = constants(), rb = riboMeta();
   const esc = (x) => String(x ?? '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
-  const riboTxt = rb ? `43S from PDB ${esc(rb.pdb ?? '?')}${rb.citation ? ` (${esc(rb.citation)})` : ''}` : '43S drawn as a simple blob of approximate 40S size (structure file not loaded)';
+  const riboTxt = rb ? `48S scanning complex, PDB ${esc(rb.pdb ?? '?')}${rb.citation ? ` (${esc(rb.citation)})` : ''}` : '43S drawn as a simple blob of approximate 40S size (structure file not loaded)';
   const row = (k) => `<span title="${esc(K[k].source || 'no source given')}">${esc(K[k].label)}: <b>${K[k].unit === 'Å' ? (K[k].value / 10).toFixed(K[k].value < 100 ? 2 : 0) + ' nm' : K[k].value + ' ' + K[k].unit}</b>${K[k].found ? '' : '*'}</span>`;
   const anyFallback = Object.values(K).some(x => !x.found);
   return `<b>3D model built from the predicted secondary structure with ideal A-form helices; ${riboTxt}. Not a predicted tertiary structure; dynamics are illustrative, driven by the scanning model.</b><br>

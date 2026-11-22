@@ -8,7 +8,7 @@ export const PARAMS = {
   capZone:     { value: 15,   min: 0,    max: 60,  step: 1,    unit: 'nt',    label: 'Cap zone (hairpins here block loading)', cite: 'kozak1989' },
   capFree:     { value: 25,   min: 0,    max: 60,  step: 1,    unit: 'kcal/mol', label: 'Cap-zone hairpin ΔG tolerated', cite: null },
   capAUG:      { value: 0.3,  min: 0,    max: 1,   step: 0.05, unit: '×',     label: 'Initiation factor, AUG near cap', cite: null },
-  capAUGnt:    { value: 12,   min: 0,    max: 40,  step: 1,    unit: 'nt',    label: 'Cap-proximal AUG zone', cite: 'kozak1991' },
+  capAUGnt:    { value: 12,   min: 0,    max: 40,  step: 1,    unit: 'nt',    label: 'Cap-proximal AUG zone', cite: null },
   hpKT:        { value: 4.0,  min: 1,    max: 10,  step: 0.1,  unit: 'kcal/mol', label: 'Hairpin barrier scale', cite: null },
   tc:          { value: 1.0,  min: 0.05, max: 1,   step: 0.01, unit: '',      label: 'eIF2·TC availability (1 = no stress)', cite: null },
   loadTCexp:   { value: 0.5,    min: 0,    max: 1.5, step: 0.05, unit: '',      label: 'Loading ∝ TC^β (β)', cite: null },
@@ -24,7 +24,7 @@ export const PARAMS = {
 
 export const SOURCES = {
   kozak1989: { text: 'Kozak 1989 Mol Cell Biol: −30 kcal/mol hairpin 12 nt from the cap blocked 40S loading; at 52 nt no effect; −61 kcal/mol stalled scanning', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC363665/' },
-  kozak1991: { text: 'Kozak 1991: AUGs very close to the cap are inefficiently recognised (per scientific-judge review; verify)', url: null },
+
   wang2022:  { text: 'Wang et al. 2022 Cell: ~100 nt/s scanning (smFRET, yeast in vitro)', url: 'https://pubmed.ncbi.nlm.nih.gov/36334590/' },
   scan10:    { text: '10–20 nt/s scanning (single-molecule yeast scanning complexes)', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC11446271/' },
   vattem2004:{ text: 'Vattem & Wek 2004 PNAS: ATF4 uORF1 (3 codons) promotes reinitiation; uORF2 overlaps CDS; eIF2α-P delays TC re-acquisition', url: 'https://pmc.ncbi.nlm.nih.gov/articles/PMC509193/' },

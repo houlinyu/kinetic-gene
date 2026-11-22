@@ -33,8 +33,8 @@ Rebuild data (Python ≥3.11): see `pipeline/README.md`. Third-party inputs are 
 
 ## Data and credits
 
-- Transcripts/exons: Ensembl REST, GENCODE (GRCh38). Folding: ViennaRNA (Lorenz et al. 2011). Splice sites: MaxEntScan (Yeo & Burge 2004), validated against the published reference scores.
-- Measured: GTEx PSI via ASCOT (Ling et al. 2020); translation efficiency from Cao et al. 2021 via https://github.com/zzz2010/5UTR_Optimizer (MIT); Optimus 5-Prime (Sample et al. 2019, GPL-3.0) re-implemented and validated at r² = 0.84 — weights not redistributed.
+- Transcripts/exons: Ensembl REST, GENCODE (GRCh38). Folding: ViennaRNA (Lorenz et al. 2011). Splice sites: MaxEntScan (Yeo & Burge 2004), scored with `maxentpy` and checked against that implementation's documented reference values (the Burge-lab server was unreachable, so this is not an independent check of the original).
+- Measured: GTEx PSI via ASCOT (Ling et al. 2020); translation efficiency from Cao et al. 2021 via https://github.com/zzz2010/5UTR_Optimizer (MIT); Optimus 5-Prime (Sample et al. 2019, GPL-3.0) re-implemented in numpy and checked on the authors' held-out sets (Pearson r = 0.915 random, 0.882 human); weights not redistributed.
 - Structures: 48S scanning complex PDB 8PJ1 (Petrychenko et al. 2025); 48S+eIF4F 8OZ0 (Brito Querido et al. 2024); Pol II elongation complex 6GMH (Vos et al. 2018, mammalian); human spliceosome C* 5XJC (Zhang et al. 2017); U1 snRNP 4PJO (Kondo et al. 2015).
 - Full source list in the app and in `data/*.json` → `meta.sources`.
 - Starter kit: the Sundai 3D-worlds workshop (https://github.com/hunterh37/sundai-3dworlds).
